@@ -6,5 +6,5 @@ def stress(dist_embedd, dist_original):
     for (de, do) in zip(dist_embedd, dist_original):
         s_diff+=pow(de-do,2)
         s_original+=pow(do,2)
-    return s_diff/s_original
+    return float(s_diff/s_original)
 
