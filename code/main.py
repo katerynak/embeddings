@@ -15,7 +15,7 @@ if __name__=="__main__":
     stress = []
     for n in sampling_n:
         stress.append(utils.eval_stress(s,nb_points=n,num_rows_2_sample=stress_samples))
-    print (sampling_n)
+    print(sampling_n)
     print(stress)
     plt.xlabel('n. resampling points')
     plt.ylabel('stress')
