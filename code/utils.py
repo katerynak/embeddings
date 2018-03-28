@@ -12,7 +12,8 @@ def max_len(streamlines):
     return max
 
 def eval_stress(streamlines, nb_points, num_rows_2_sample):
-    embedding = load.load_embedding(streamlines, nb_points)
+    #embedding = load.load_embedding(streamlines, nb_points)
+    embedding = load.load_structured_embedding(streamlines, nb_points)
     np.random.seed(0)
     original_distances = []
     embedded_distances = []
@@ -21,6 +22,7 @@ def eval_stress(streamlines, nb_points, num_rows_2_sample):
     idx_comb = combinations(idx,2)
     for (idx0, idx1) in idx_comb:
         original_distances.append(d.original_distance([streamlines[idx0]], [streamlines[idx1]]))
-        embedded_distances.append(d.euclidean_distance(embedding[idx0], embedding[idx1]))
+        #embedded_distances.append(d.euclidean_distance(embedding[idx0], embedding[idx1]))
+        embedded_distances.append(d.original_distance([embedding[idx0]], [embedding[idx1]]))
     stress = em.stress(dist_embedd=embedded_distances, dist_original=original_distances)
     return stress

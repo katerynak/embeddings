@@ -8,7 +8,11 @@ def load():
     s = data.streamlines
     return s
 
-def load_embedding(streamlines, nb_points=24):
+def load_embedding(streamlines, nb_points):
     ss = set_number_of_points(streamlines, nb_points=nb_points)
     embedding = np.array([strm.flatten() for strm in ss])
+    return embedding
+
+def load_structured_embedding(streamlines, nb_points):
+    embedding = set_number_of_points(streamlines, nb_points=nb_points)
     return embedding
