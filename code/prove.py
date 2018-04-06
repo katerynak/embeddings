@@ -7,6 +7,8 @@ import utils
 import distances as d
 from numpy.random import uniform, randint
 from dissimilarity import compute_dissimilarity
+import eval_metrics as em
+
 
 def prova_resampling():
     s = load.load()
@@ -37,8 +39,15 @@ def prova_dissimilarity():
 
     return 0
 
+def correlazione():
+    s = load.load()
+    embeddings, prototype_idx = compute_dissimilarity(s,
+                                                                    verbose=True, num_prototypes=10)
+    dist_orig, dist_emb = utils.eval_distances(s,embeddings,num_rows_2_sample=100)
+    #print ("embedded: ", np.ndarray.flatten(np.asarray(dist_emb)))
+    print ("original: ", np.ndarray.flatten(np.asarray(dist_orig)))
+    c = em.inverse_correlation(dist_original=np.ndarray.flatten(np.asarray(dist_orig)), dist_embedd=np.ndarray.flatten(np.asarray(dist_emb)))
+    print("Correlation distance: ",c)
 
 if __name__=="__main__":
-    prova_dissimilarity()
-
-
+    correlazione()

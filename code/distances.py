@@ -17,11 +17,11 @@ def mdf1(a,b):
     d2 = np.linalg.norm(flatt([a[::-1]])[0]-flatt([b])[0])
     return min(d1,d2)
 
-def mdf2(a,b,length):
+def mdf2(a,b):
     sum_dist = 0
     sum_dist_flip = 0
     for (p1, p2) in zip([a][0], [b][0]):
         sum_dist += np.linalg.norm(p1-p2)
     for (p1, p2) in zip([a[::-1]][0],[b][0]):
         sum_dist_flip += np.linalg.norm(p1-p2)
-    return (min(sum_dist, sum_dist_flip))/length
+    return (min(sum_dist, sum_dist_flip))/len([a][0])
