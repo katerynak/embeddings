@@ -48,7 +48,7 @@ def lipschitz_embedding(dataset, distance_function, k=None,
 
     """
     if k is None:
-        k = int(np.floor(np.log2(len(dataset))))
+        k = int(np.floor(np.log2(len(dataset)))) ** 2
         print("k = %s" % k)
 
     if linial1994:
@@ -74,7 +74,7 @@ def euclidean(a, b):
 
 if __name__ == '__main__':
     np.random.seed(0)
-    dataset = np.array([np.random.uniform(size=5) for i in range(1000)], dtype=np.object)
+    dataset = np.array([np.random.uniform(size=5) for i in range(100)], dtype=np.object)
     distance_function = euclidean
 
     dataset_embedded, R = lipschitz_embedding(dataset, distance_function)
