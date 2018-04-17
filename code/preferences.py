@@ -1,7 +1,8 @@
 #comment out embeddings which are not used
 
 #RESAMPLING_EMBEDDING = True
-DISSIMILARITY_EMBEDDING = True
+#DISSIMILARITY_EMBEDDING = True
+LIPSCHITZ_EMBEDDING = True
 
 #TODO: collegare questi parametri
 ORIGINAL_DISTANCE = "mam"
@@ -11,5 +12,5 @@ EMBEDDED_DISTANCE = "euclidean"
 
 STRESS = True
 PEARSON_CORRELATION = True
-#DISTORSION = True
+DISTORTION = True
 

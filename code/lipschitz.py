@@ -1,5 +1,14 @@
 import numpy as np
+from joblib import Parallel, delayed
+import multiprocessing
 
+def compute_A_i(i, sizeD, sizeA):
+    return dataset[np.random.permutation(sizeD)[: sizeA[i]]]
+
+def compute_dataset_embedded(i, object, R, distance_function):
+    return compute_distance_from_reference_sets(object,
+                                                                  R,
+                                                                  distance_function)
 
 def compute_reference_sets(dataset, k, sizeA=None):
     """Compute k reference sets for a given dataset. Optionally, specify
@@ -56,11 +65,18 @@ def lipschitz_embedding(dataset, distance_function, k=None,
     else:
         R = compute_reference_sets(dataset, k, sizeA)
 
+    num_cores = multiprocessing.cpu_count()
+    print("computation with {0} cores".format(num_cores))
+
+    #for i, object in enumerate(dataset):
+    # dataset_embedded[i, :] = compute_distance_from_reference_sets(object,
+    #                                                               R,
+    #                                                               distance_function)
+
+
     dataset_embedded = np.zeros([len(dataset), k])
-    for i, object in enumerate(dataset):
-        dataset_embedded[i, :] = compute_distance_from_reference_sets(object,
-                                                                      R,
-                                                                      distance_function)
+    dataset_embedded = np.asarray(Parallel(n_jobs=num_cores)(delayed(compute_dataset_embedded)(i,object,R,distance_function) for i,object
+                               in enumerate(dataset)))
 
     if linial1994:
         dataset_embedded = dataset_embedded / (k ** (1.0 / 2.0))
@@ -78,4 +94,4 @@ if __name__ == '__main__':
     distance_function = euclidean
 
     dataset_embedded, R = lipschitz_embedding(dataset, distance_function)
-    
+
