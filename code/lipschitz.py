@@ -7,8 +7,8 @@ def compute_A_i(i, sizeD, sizeA):
     return dataset[np.random.permutation(sizeD)[: sizeA[i]]]
 
 #function to execute in parallel for lipschitz_embedding calculation for object obj
-def compute_dataset_embedded(i, object, R, distance_function):
-    print("Computing embedding of object ", i)
+def compute_dataset_embedded(data_dim, i, object, R, distance_function):
+    print("Computing embedding of object {0}/{1}".format(i, data_dim))
     return compute_distance_from_reference_sets(object,
                                                                   R,
                                                                   distance_function)
@@ -78,7 +78,8 @@ def lipschitz_embedding(dataset, distance_function, k=None,
 
 
     dataset_embedded = np.zeros([len(dataset), k])
-    dataset_embedded = np.asarray(Parallel(n_jobs=num_cores)(delayed(compute_dataset_embedded)(i,object,R,distance_function) for i,object
+    data_dim = len(dataset)
+    dataset_embedded = np.asarray(Parallel(n_jobs=num_cores)(delayed(compute_dataset_embedded)(data_dim,i,object,R,distance_function) for i,object
                                in enumerate(dataset)))
 
     if linial1994:
