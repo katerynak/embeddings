@@ -2,10 +2,13 @@ import numpy as np
 from joblib import Parallel, delayed
 import multiprocessing
 
+#function to execute in parallel for reference set selection
 def compute_A_i(i, sizeD, sizeA):
     return dataset[np.random.permutation(sizeD)[: sizeA[i]]]
 
+#function to execute in parallel for lipschitz_embedding calculation for object obj
 def compute_dataset_embedded(i, object, R, distance_function):
+    print("Computing embedding of object ", i)
     return compute_distance_from_reference_sets(object,
                                                                   R,
                                                                   distance_function)

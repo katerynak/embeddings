@@ -81,7 +81,7 @@ if __name__=="__main__":
         inv_corr = []
         distortion = []
        # for n in num_prototypes:
-        embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance)
+        embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance, k=4, sizeA=4)
         original_distances, embedded_distances = utils.eval_distances(s, embeddings,
                                                                       num_rows_2_sample=sterss_samples)
         if 'STRESS' in globals():
@@ -103,7 +103,7 @@ if __name__=="__main__":
         plt.subplot(211)
         plt.xlabel('n. prototypes')
         plt.ylabel('stress')
-        plt.plot(num_prototypes, stress, 'ro-')
+        #plt.plot(num_prototypes, stress, 'ro-')
 
         if 'PEARSON_CORRELATION' in globals():
             plt.subplot(212)
