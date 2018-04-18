@@ -2,16 +2,6 @@ import numpy as np
 from joblib import Parallel, delayed
 import multiprocessing
 
-#function to execute in parallel for reference set selection
-def compute_A_i(i, sizeD, sizeA):
-    return dataset[np.random.permutation(sizeD)[: sizeA[i]]]
-
-#function to execute in parallel for lipschitz_embedding calculation for object obj
-def compute_dataset_embedded(data_dim, i, object, R, distance_function):
-    print("Computing embedding of object {0}/{1}".format(i, data_dim))
-    return compute_distance_from_reference_sets(object,
-                                                                  R,
-                                                                  distance_function)
 
 def compute_reference_sets(dataset, k, sizeA=None):
     """Compute k reference sets for a given dataset. Optionally, specify
@@ -48,6 +38,9 @@ def compute_distance_from_reference_sets(object, R, distance_function):
                                                          A,
                                                          distance_function) for A in R])
 
+def aaa(object, R, distance_function):
+    return [np.min([distance_function(object, x) for x in A]) for A in R]
+
 
 def lipschitz_embedding(dataset, distance_function, k=None,
                         linial1994=True, sizeA=None):
@@ -71,16 +64,13 @@ def lipschitz_embedding(dataset, distance_function, k=None,
     num_cores = multiprocessing.cpu_count()
     print("computation with {0} cores".format(num_cores))
 
-    #for i, object in enumerate(dataset):
-    # dataset_embedded[i, :] = compute_distance_from_reference_sets(object,
-    #                                                               R,
-    #                                                               distance_function)
+    dataset_embedded = np.zeros([len(dataset), k])
+    for i, object in enumerate(dataset):
+        dataset_embedded[i, :] = compute_distance_from_reference_sets(object, R,distance_function)
 
 
-    # dataset_embedded = np.zeros([len(dataset), k])
-    data_dim = len(dataset)
-    dataset_embedded = np.asarray(Parallel(n_jobs=num_cores)(delayed(compute_dataset_embedded)(data_dim,i,object,R,distance_function) for i,object
-                               in enumerate(dataset)))
+
+    # dataset_embedded = Parallel(n_jobs=-1, verbose=10)(delayed(compute_distance_from_reference_sets)(object, R, distance_function) for object in dataset)
 
     if linial1994:
         dataset_embedded = dataset_embedded / (k ** (1.0 / 2.0))
