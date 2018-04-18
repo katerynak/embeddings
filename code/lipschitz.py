@@ -77,7 +77,7 @@ def lipschitz_embedding(dataset, distance_function, k=None,
     #                                                               distance_function)
 
 
-    dataset_embedded = np.zeros([len(dataset), k])
+    # dataset_embedded = np.zeros([len(dataset), k])
     data_dim = len(dataset)
     dataset_embedded = np.asarray(Parallel(n_jobs=num_cores)(delayed(compute_dataset_embedded)(data_dim,i,object,R,distance_function) for i,object
                                in enumerate(dataset)))

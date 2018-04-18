@@ -81,7 +81,7 @@ if __name__=="__main__":
         inv_corr = []
         distortion = []
        # for n in num_prototypes:
-        embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance, k=4, sizeA=4)
+        embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance, linial1994=False, k=4, sizeA=[2,2,4,4])
         original_distances, embedded_distances = utils.eval_distances(s, embeddings,
                                                                       num_rows_2_sample=sterss_samples)
         if 'STRESS' in globals():
