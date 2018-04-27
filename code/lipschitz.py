@@ -61,11 +61,12 @@ def lipschitz_embedding(dataset, distance_function, k=None,
     else:
         R = compute_reference_sets(dataset, k, sizeA)
 
-    num_cores = multiprocessing.cpu_count()
-    print("computation with {0} cores".format(num_cores))
+    # num_cores = multiprocessing.cpu_count()
+    # print("computation with {0} cores".format(num_cores))
 
     dataset_embedded = np.zeros([len(dataset), k])
     for i, object in enumerate(dataset):
+        print(i)
         dataset_embedded[i, :] = compute_distance_from_reference_sets(object, R,distance_function)
 
 
@@ -88,4 +89,3 @@ if __name__ == '__main__':
     distance_function = euclidean
 
     dataset_embedded, R = lipschitz_embedding(dataset, distance_function)
-
