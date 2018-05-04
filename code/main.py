@@ -10,9 +10,16 @@ import eval_metrics as em
 import lipschitz
 import distances as dist
 import lmds
+import random
+
 
 if __name__=="__main__":
     s = load.load()
+    s_idx = list(range(0, len(s)))
+    random.seed(0)
+    random.shuffle(s_idx)
+    s_size = 50000
+    s = s[s_idx][:s_size]
     if 'RESAMPLING_EMBEDDING' in globals():
         sampling_n = np.geomspace(12, utils.max_len(s), num=10)
         sampling_n = [int(i) for i in sampling_n]
@@ -124,49 +131,50 @@ if __name__=="__main__":
 
         plt.show()
 
-        if 'LMDS_EMBEDDING' in globals():
-            sterss_samples = 10
-            k = [16]
-            n_landmarks = [40]
-            stress = []
-            inv_corr = []
-            distortion = []
-            for (n,l) in zip(k, n_landmarks):
-                embeddings = lmds.compute_lmds(s, nl=l, k=n, distance=dist.original_distance)
-                original_distances, embedded_distances = utils.eval_distances(s, embeddings,
-                                                                              num_rows_2_sample=sterss_samples)
-                if 'STRESS' in globals():
-                    stress.append(em.stress(dist_original=original_distances,
-                                            dist_embedd=embedded_distances))
-                # print("dissimilarity stress: ", stress)
-                if 'PEARSON_CORRELATION' in globals():
-                    inv_corr.append(
-                        em.inverse_correlation(dist_original=np.ndarray.flatten(np.asarray(original_distances)),
-                                               dist_embedd=np.ndarray.flatten(np.asarray(embedded_distances))))
-                if 'DISTORTION' in globals():
-                    distortion.append(em.distorsion(dist_original=original_distances,
-                                                    dist_embedd=embedded_distances))
-            print("Stress: ", stress)
-            print("Correlation distance: ", inv_corr)
-            print("Distiortion: ", distortion)
-            plt.figure(1)
+    if 'LMDS_EMBEDDING' in globals():
+        #results_dir = '../eval_results/lmds'
+        sterss_samples = 100
+        k = [2,4,8,10,12]
+        n_landmarks = [30,30,30,30,30]
+        stress = []
+        inv_corr = []
+        distortion = []
+        for (n,l) in zip(k, n_landmarks):
+            embeddings = lmds.compute_lmds(s, nl=l, k=n, distance=dist.original_distance)
+            original_distances, embedded_distances = utils.eval_distances(s, embeddings,
+                                                                          num_rows_2_sample=sterss_samples)
+            if 'STRESS' in globals():
+                stress.append(em.stress(dist_original=original_distances,
+                                        dist_embedd=embedded_distances))
+            # print("dissimilarity stress: ", stress)
+            if 'PEARSON_CORRELATION' in globals():
+                inv_corr.append(
+                    em.inverse_correlation(dist_original=np.ndarray.flatten(np.asarray(original_distances)),
+                                           dist_embedd=np.ndarray.flatten(np.asarray(embedded_distances))))
+            if 'DISTORTION' in globals():
+                distortion.append(em.distorsion(dist_original=original_distances,
+                                                dist_embedd=embedded_distances))
+        print("Stress: ", stress)
+        print("Correlation distance: ", inv_corr)
+        print("Distiortion: ", distortion)
+        plt.figure(1)
 
+        plt.subplot(211)
+        plt.xlabel('n. prototypes')
+        plt.ylabel('stress')
+        # plt.plot(num_prototypes, stress, 'ro-')
+
+        if 'PEARSON_CORRELATION' in globals():
+            plt.subplot(212)
+            plt.xlabel('n. prototypes')
+            plt.ylabel('correlation distance')
+            plt.plot(k, inv_corr, 'ro-')
+
+        if 'STRESS' in globals():
             plt.subplot(211)
             plt.xlabel('n. prototypes')
             plt.ylabel('stress')
-            # plt.plot(num_prototypes, stress, 'ro-')
+            plt.plot(k, stress, 'ro-')
 
-            if 'PEARSON_CORRELATION' in globals():
-                plt.subplot(212)
-                plt.xlabel('n. prototypes')
-                plt.ylabel('correlation distance')
-                plt.plot(k, inv_corr, 'ro-')
-
-            if 'DISTORTION' in globals():
-                plt.subplot(211)
-                plt.xlabel('n. prototypes')
-                plt.ylabel('distortion')
-                plt.plot(k, distortion, 'ro-')
-
-            plt.show()
+        plt.show()
 
