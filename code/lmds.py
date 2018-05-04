@@ -98,13 +98,17 @@ def centering_matrix(n):
 def eig(distance_matrix, k):
     """
     function computes eigenvector/eigenvalue decomposition of the mean-centered "inner-product"
-    matrix B and returns k largest eigenvalues and corresponding eigenvectors
+    matrix B and returns k largest eigenvalues and corresponding eigenvectors,
+    if among k largest eigenvalues there are negative values, function discard them and
+    returns only positive eigenvalues and corresponding eigenvectors
     """
 
     H = centering_matrix(distance_matrix.shape[0])
     B = -0.5*(np.matmul(np.matmul(H,distance_matrix), H))
     E, U = np.linalg.eig(B)
     sorted_idx = np.argsort(E)[::-1][:k]
+    posE = sum(x > 0 for x in E[sorted_idx])
+    sorted_idx = sorted_idx[:posE]
     return E[sorted_idx],U[sorted_idx]
 
 
@@ -132,7 +136,7 @@ def compute_final_embedding(d_i, M_sharp, mu):
 
 def compute_lmds(tracks, nl=10, k=4, distance = ""):
     """
-    computes lmds euclidean embeddings of tracks of size k using n landmarks
+    computes lmds euclidean embeddings of tracks of size k using nl landmarks
     """
 
     if not distance:

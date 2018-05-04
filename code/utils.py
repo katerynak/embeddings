@@ -27,8 +27,8 @@ def eval_stress(streamlines, embeddings, num_rows_2_sample, original_distance=d.
     return stress
 
 def eval_distances(streamlines, embeddings, num_rows_2_sample, original_distance=d.original_distance,
-                embedded_distance=d.euclidean_distance):
-    np.random.seed(0)
+                embedded_distance=d.euclidean_distance, seed=0):
+    np.random.seed(seed)
     original_distances = []
     embedded_distances = []
     idx = np.random.choice(len(streamlines), num_rows_2_sample)
