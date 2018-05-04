@@ -88,21 +88,35 @@ def landmark_mds(Dl, k):
     computes euclidean muldidimentional scaling of landmarks points
     transforms matrix of pairwise distances into matrix of euclidean embeddings of size k
     """
-    mds = sklearn.manifold.MDS(dissimilarity = 'precomputed', n_components=k, n_jobs=-1)
+    mds = sklearn.manifold.MDS(dissimilarity = 'precomputed', n_components=k, n_jobs=-1, metric=False)
     return mds.fit_transform(Dl)
 
-def compute_M_sharp(landmarks_euclidean_matrix):
+def centering_matrix(n):
+
+    return np.identity(n) - (1./n)* np.ones((n, n))
+
+def eig(distance_matrix, k):
+    """
+    function computes eigenvector/eigenvalue decomposition of the mean-centered "inner-product"
+    matrix B and returns k largest eigenvalues and corresponding eigenvectors
+    """
+
+    H = centering_matrix(distance_matrix.shape[0])
+    B = -0.5*(np.matmul(np.matmul(H,distance_matrix), H))
+    E, U = np.linalg.eig(B)
+    sorted_idx = np.argsort(E)[::-1][:k]
+    return E[sorted_idx],U[sorted_idx]
+
+
+def compute_M_sharp(E, U):
     """
     computes M sharp from eigenvalues and eigenvectors of landmarks_euclidean_matrix
     M sharp : E ^ (-1/2) * transpose (U), where
     U is the eigenvectors matrix and E is the diagonal eigenvalue matrix
     """
+    return np.matmul((np.diag(np.reciprocal(np.power(E,0.5)))), U)
 
-    #E, U = np.linalg.eig(landmarks_euclidean_matrix)
-    E, U = LA.eig(landmarks_euclidean_matrix)
-    return np.reciprocal(np.sqrt(np.diag(E))) * np.transpose(U)
-
-def landmarks_original_mean(Dl):
+def columns_mean(Dl):
     """
     function computes mean values of each column of Dl
     """
@@ -112,26 +126,37 @@ def compute_final_embedding(d_i, M_sharp, mu):
     """
     computes final embedding of object d_i
     """
-    y_i = 0.5 * M_sharp * (mu - d_i)
-    return y_i
+    y_i = 0.5 * np.matmul(M_sharp , (mu - d_i))
+    return y_i.tolist()
 
 
-def compute_landmarks_fastmap(tracks):
-    n = 10 #number of landmark points
-    k = 10 #dimention of final embedding
+def compute_lmds(tracks, nl=10, k=4, distance = ""):
+    """
+    computes lmds euclidean embeddings of tracks of size k using n landmarks
+    """
+
+    if not distance:
+        distance = dist.original_distance
+
     distances, landmarks_idx = dissimilarity.compute_dissimilarity(tracks,
-                                                               verbose=True, num_prototypes=n)
+                                                               verbose=True, num_prototypes=nl)
+    distances = np.power(distances, 2)
     landmarks = [tracks[i] for i in landmarks_idx]
-    Dl = landmark_dist_matrix(landmarks, distance=dist.original_distance)
-    landmarks_euclidean = landmark_mds(Dl,k)
-    M_sharp = compute_M_sharp(landmarks_euclidean)
-    mu = landmarks_original_mean(Dl)
+
+    Dl = landmark_dist_matrix(landmarks, distance=distance)
+    Dl = np.power(Dl, 2)
+
+    E, U = eig(Dl, k)
+    M_sharp = compute_M_sharp(E, U)
+    mu = columns_mean(Dl)
+
     embeddings = []
     for d_i in distances:
         embeddings.append(compute_final_embedding(d_i, M_sharp, mu))
 
+    return embeddings
+
 if __name__ == '__main__':
     import load
     tracks = load.load()
-    fastmap_embeddings = compute_landmarks_fastmap(tracks)
-
+    lmds_embeddings = compute_lmds(tracks, nl = 20, k = 4)
