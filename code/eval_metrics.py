@@ -23,9 +23,12 @@ def stress(dist_embedd, dist_original):
         s_diff += pow(float(de/norm_embedd) - float(do/norm_orig), 2)
     return float (s_diff)
 
-def inverse_correlation(dist_embedd, dist_original):
-    return 1 - abs(np.corrcoef(dist_embedd, dist_original)[1,0])
 
+# def inverse_correlation(dist_embedd, dist_original):
+#     return 1 - abs(np.corrcoef(dist_embedd, dist_original)[1,0])
+
+def correlation_distance(dist_embedd, dist_original):
+    return 1 - abs(np.corrcoef(dist_embedd, dist_original)[1,0])
 
 #   function returns values c1 and c2 such that
 #   (1/c1)*do(o1, o2) <= de(f(o1), f(o2)) <= c2 * do(o1,o2)
