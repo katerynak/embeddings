@@ -84,28 +84,40 @@ def distance_euclidean(A, B):
     return distance_matrix(np.atleast_2d(A), np.atleast_2d(B))
 
 
+def sph2cart(az, el, r):
+    rcos_theta = r * np.cos(el)
+    x = rcos_theta * np.cos(az)
+    y = rcos_theta * np.sin(az)
+    z = r * np.sin(el)
+    return x, y, z
+
 if __name__ == '__main__':
     from scipy.spatial import distance_matrix
     
-    np.random.seed(0)
-    N = 1000
+    np.random.seed(1)
+    N = 100000
     d = 20
     X = np.random.uniform(size=(N, d))
-    D_original = distance_matrix(X, X)
-    D = D_original.copy()
+    k = 14
 
-    k = 12
-    Y = np.zeros([len(X), k])
+    # alpha = np.random.uniform(low=0.0, high=(2.0 * np.pi), size=N)
+    # beta = np.random.uniform(low=0.0, high=(2.0 * np.pi), size=N)
+    # X = np.array([sph2cart(alpha[i], beta[i], 1.0) for i in range(N)])
+    # k = 2
 
-    for i in range(k):
-        print(i)
-        idx_a, idx_b = find_pivot_points(D)
-        Y[:, i] = projection(D, idx_a, idx_b)
-        D2 = update_residual_distance(D, Y)
-        D = np.sqrt(D2)
+    if N <= 1000:
+        D_original = distance_matrix(X, X)
+        Y = np.zeros([len(X), k])
+        D = D_original.copy()
+        for i in range(k):
+            print(i)
+            idx_a, idx_b = find_pivot_points(D)
+            Y[:, i] = projection(D, idx_a, idx_b)
+            D2 = update_residual_distance(D, Y)
+            D = np.sqrt(D2)
 
-    DY = distance_matrix(Y, Y)
-    print(np.corrcoef(D_original.flatten(), DY.flatten()))
+        DY = distance_matrix(Y, Y)
+        print(np.corrcoef(D_original.flatten(), DY.flatten()))
 
 
     Y = np.zeros([len(X), k])
