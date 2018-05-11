@@ -1,0 +1,8 @@
+stress	6.570599744917206e-07
+inverse_correlation	0.480944185386581
+distortion	(199.41739735173206, 1.146259344676199)
+n_streamlines	412492
+exec_time	60.33514428138733
+eval_samples	100
+k	2
+n_landmarks	30
