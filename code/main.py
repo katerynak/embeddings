@@ -13,6 +13,7 @@ import lmds
 import random
 import os
 import time
+import fastmap
 
 
 if __name__=="__main__":
@@ -80,30 +81,66 @@ if __name__=="__main__":
         plt.show()
 
     if 'LIPSCHITZ_EMBEDDING' in globals():
-        sterss_samples = 10
+        stress_samples = 100
+        results_dir = "../eval_results/lipshitz"
+        if not os.path.exists(results_dir):
+            os.makedirs(results_dir)
         # num_prototypes = np.linspace(10, 30, 3)
-        #k = [2,4]
-        #sizeA = [[2,4],[2,2,4,4]]
-        k = [8]
-        sizeA = [[2,2,4,4,8,8,8,8]]
+        k = [2,4,8,16]
+        sizeA = [[2,4],[2,2,4,4],[2,2,4,4,8,8,8,8],
+                 [2,2,4,4,8,8,8,8,16,16,16,16,16,16,16,16]]
+        # k = [8]
+        # sizeA = [[2,2,4,4,8,8,8,8]]
         stress = []
         inv_corr = []
         distortion = []
-        for (n, A) in zip(k, sizeA):
-            embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance)
-            #embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance, linial1994=False, k=n, sizeA=A)
-            original_distances, embedded_distances = utils.eval_distances(s, embeddings,
-                                                                          num_rows_2_sample=sterss_samples)
-            if 'STRESS' in globals():
-                stress.append(em.stress(dist_original=original_distances,
-                                        dist_embedd=embedded_distances))
-            # print("dissimilarity stress: ", stress)
-            if 'PEARSON_CORRELATION' in globals():
-                inv_corr.append(em.correlation_distance(dist_original=np.ndarray.flatten(np.asarray(original_distances)),
-                                                       dist_embedd=np.ndarray.flatten(np.asarray(embedded_distances))))
-            if 'DISTORTION' in globals():
-                distortion.append(em.distorsion(dist_original=original_distances,
+        for data_seed in range(4):
+            s_idx = list(range(0, len(s)))
+            data_seed = 0
+            random.seed(data_seed)
+            random.shuffle(s_idx)
+            """
+            s_size : number of streamlines
+            """
+            s_size = 50000
+            s = s[s_idx][:s_size]
+            for (n, A) in zip(k, sizeA):
+                for stress_seed in range(4):
+
+                    #embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance)
+
+                    start_time = time.time()
+                    embeddings, R = lipschitz.lipschitz_embedding(s, dist.original_distance, linial1994=False, k=n, sizeA=A)
+                    comp_time = time.time() - start_time
+                    original_distances, embedded_distances = utils.eval_distances(s, embeddings,
+                                                                                  num_rows_2_sample=stress_samples)
+                    if 'STRESS' in globals():
+                        stress.append(em.stress(dist_original=original_distances,
                                                 dist_embedd=embedded_distances))
+                    # print("dissimilarity stress: ", stress)
+                    if 'PEARSON_CORRELATION' in globals():
+                        inv_corr.append(em.correlation_distance(dist_original=np.ndarray.flatten(np.asarray(original_distances)),
+                                                               dist_embedd=np.ndarray.flatten(np.asarray(embedded_distances))))
+                    if 'DISTORTION' in globals():
+                        distortion.append(em.distorsion(dist_original=original_distances,
+                                                        dist_embedd=embedded_distances))
+
+                    resFileName = results_dir + "/" + "k_" + str(n) + \
+                                  "__data_seed_" + str(data_seed) + \
+                                  "__eval_seed_" + str(stress_seed) + \
+                                  "__streamlines_" + str(len(embeddings))
+                    with open(resFileName, 'w') as f:
+                        f.write('stress\t' + str(stress[-1]) + '\n')
+
+                        # TODO: call this variable correlation_distance
+                        f.write('inverse_correlation\t' + str(inv_corr[-1]) + '\n')
+
+                        f.write('distortion\t' + str(distortion[-1]) + '\n')
+                        f.write('n_streamlines\t' + str(len(embeddings)) + '\n')
+                        f.write('exec_time\t' + str(comp_time) + '\n')
+                        f.write('eval_samples\t' + str(stress_samples) + '\n')
+                        f.write('n_reference_objects\t' + str(n) + '\n')
+                        f.write('object sizes\t' + ' '.join([str(x) for x in A]) + '\n')
         print("Stress: ", stress)
         print("Correlation distance: ", inv_corr)
         print("Distiortion: ", distortion)
@@ -135,7 +172,7 @@ if __name__=="__main__":
         """
         change stress_samples value to get more accurate evaluation results
         """
-        stress_samples = 100
+        stress_samples = 1000
 
         """
         pay attention to k: : size of euclidean embedding may be smaller in practice 
@@ -149,7 +186,6 @@ if __name__=="__main__":
         distortion = []
         for data_seed in range(4):
             s_idx = list(range(0, len(s)))
-            data_seed = 0
             random.seed(data_seed)
             random.shuffle(s_idx)
             """
@@ -200,27 +236,80 @@ if __name__=="__main__":
                             f.write('eval_samples\t' + str(stress_samples) + '\n')
                             f.write('k\t'+ str(n)+'\n')
                             f.write('n_landmarks\t' + str(l)+'\n')
+        # print("Stress: ", stress)
+        # print("Correlation distance: ", inv_corr)
+        # print("Distiortion: ", distortion)
+        # plt.figure(1)
+        #
+        # plt.subplot(211)
+        # plt.xlabel('n. prototypes')
+        # plt.ylabel('stress')
+        # # plt.plot(num_prototypes, stress, 'ro-')
+        #
+        # if 'PEARSON_CORRELATION' in globals():
+        #     plt.subplot(212)
+        #     plt.xlabel('n. prototypes')
+        #     plt.ylabel('correlation distance')
+        #     plt.plot(k, inv_corr, 'ro-')
+        #
+        # if 'STRESS' in globals():
+        #     plt.subplot(211)
+        #     plt.xlabel('n. prototypes')
+        #     plt.ylabel('stress')
+        #     plt.plot(k, stress, 'ro-')
+        #
+        # plt.show()
+
+    if 'FASTMAP_EMBEDDING' in globals():
+        results_dir = "../eval_results/fastmap"
+        if not os.path.exists(results_dir):
+            os.makedirs(results_dir)
+        """
+        change stress_samples value to get more accurate evaluation results
+        """
+        stress_samples = 1000
+
+        stress = []
+        inv_corr = []
+        distortion = []
+
+        stress_seed = 0
+        data_seed = 0
+
+        s_idx = list(range(0, len(s)))
+        random.seed(data_seed)
+        random.shuffle(s_idx)
+        """
+        s_size : number of streamlines
+        """
+        s_size = 50000
+        s = s[s_idx][:s_size]
+
+        k = 14
+        n_clusters = 10
+        subsample = False
+        n_clusters = 10
+
+        start_time = time.time()
+        embeddings = fastmap.fastmap(s, dist.original_distance, k, subsample, n_clusters)
+        comp_time = time.time() - start_time
+
+        original_distances, embedded_distances = utils.eval_distances(s, embeddings,
+                                                                      num_rows_2_sample=stress_samples,
+                                                                      seed=stress_seed)
+
+        if 'STRESS' in globals():
+            stress.append(em.stress(dist_original=original_distances,
+                                    dist_embedd=embedded_distances))
+        # print("dissimilarity stress: ", stress)
+        if 'PEARSON_CORRELATION' in globals():
+            inv_corr.append(
+                em.correlation_distance(dist_original=np.ndarray.flatten(np.asarray(original_distances)),
+                                        dist_embedd=np.ndarray.flatten(np.asarray(embedded_distances))))
+        if 'DISTORTION' in globals():
+            distortion.append(em.distorsion(dist_original=original_distances,
+                                            dist_embedd=embedded_distances))
+
         print("Stress: ", stress)
         print("Correlation distance: ", inv_corr)
         print("Distiortion: ", distortion)
-        plt.figure(1)
-
-        plt.subplot(211)
-        plt.xlabel('n. prototypes')
-        plt.ylabel('stress')
-        # plt.plot(num_prototypes, stress, 'ro-')
-
-        if 'PEARSON_CORRELATION' in globals():
-            plt.subplot(212)
-            plt.xlabel('n. prototypes')
-            plt.ylabel('correlation distance')
-            plt.plot(k, inv_corr, 'ro-')
-
-        if 'STRESS' in globals():
-            plt.subplot(211)
-            plt.xlabel('n. prototypes')
-            plt.ylabel('stress')
-            plt.plot(k, stress, 'ro-')
-
-        plt.show()
-
