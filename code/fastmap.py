@@ -18,7 +18,8 @@ def find_pivot_points(D):
 
 
 def projection(D, idx_a, idx_b):
-    """Compute the projection of each obejct. Textbook version.
+    """Compute the j-th projection of each object given the (updated)
+    distance matrix D. Textbook version.
     """
     size = D.shape[0]
     Yj = np.zeros(size)
@@ -36,16 +37,34 @@ def update_residual_distance(D, Y):
     for u in range(size):
         for v in range(size):
             D2[u, v] = D2[u, v] - ((Y[u, :] - Y[v, :]) ** 2).sum()  # this is the original one
+            if D2[u, v] < 0.0:
+                print("D2[%s, %s] = %s" % (u, v, D2[u, v]))
+
             # D2[u, v] = np.abs(D2[u, v] - ((Y[u, :] - Y[v, :]) ** 2).sum())  # rigged
 
     return D2
 
 
+def fastmap_textbook(D, k):
+    """Fastmap algorithm. Textbook version.
+    """
+    Y = np.zeros([len(X), k])
+    D = D_original.copy()
+    for i in range(k):
+        print("Dimension: %s" % i)
+        idx_a, idx_b = find_pivot_points(D)
+        Y[:, i] = projection(D, idx_a, idx_b)
+        D2 = update_residual_distance(D, Y)
+        D = np.sqrt(D2)
+
+    return Y
+
+
 def recursive_distance2(X, idx, distance, Y):
-    """Compute the recursive distance between an iterable of objects and a
-    single object with index idx, given the original distance and the
-    (partial) projection Y. Necessary for Fastmap. This is a pretty
-    fast implementation.
+    """Compute the squared recursive distance between an iterable of
+    objects and a single object with index (idx), given the original
+    distance and the (partial) projection Y. Necessary for
+    Fastmap. This is a pretty fast implementation.
     """
     tmp1 = distance(X, X[idx])
     tmp1 *= tmp1
@@ -141,15 +160,8 @@ if __name__ == '__main__':
 
     if N <= 1000:
         D_original = distance_matrix(X, X)
-        Y = np.zeros([len(X), k])
         D = D_original.copy()
-        for i in range(k):
-            print("Dimension: %s" % i)
-            idx_a, idx_b = find_pivot_points(D)
-            Y[:, i] = projection(D, idx_a, idx_b)
-            D2 = update_residual_distance(D, Y)
-            D = np.sqrt(D2)
-
+        Y = fastmap_textbook(D, k)
         DY = distance_matrix(Y, Y)
         print(np.corrcoef(D_original.flatten(), DY.flatten()))
 
