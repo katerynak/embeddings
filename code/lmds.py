@@ -83,7 +83,9 @@ def landmark_mds(Dl, k):
     transforms matrix of pairwise distances into matrix of euclidean
     embeddings of size k
     """
-    mds = sklearn.manifold.MDS(dissimilarity = 'precomputed', n_components=k, n_jobs=-1, metric=False)
+    mds = sklearn.manifold.MDS(dissimilarity='precomputed',
+                               n_components=k, n_jobs=-1,
+                               metric=False)
     return mds.fit_transform(Dl)
 
 
@@ -139,12 +141,13 @@ def compute_lmds(tracks, nl=10, k=4, distance=None):
     landmarks
 
     """
-
     if distance is None:
         distance = dist.original_distance
 
     distances, landmarks_idx = dissimilarity.compute_dissimilarity(tracks,
-                                                               verbose=True, num_prototypes=nl)
+                                                                   distance=distance,
+                                                                   verbose=True,
+                                                                   num_prototypes=nl)
     distances = np.power(distances, 2)
     landmarks = [tracks[i] for i in landmarks_idx]
 
@@ -162,7 +165,3 @@ def compute_lmds(tracks, nl=10, k=4, distance=None):
     return embeddings
 
 
-if __name__ == '__main__':
-    import load
-    tracks = load.load()
-    lmds_embeddings = compute_lmds(tracks, nl = 20, k = 4)
