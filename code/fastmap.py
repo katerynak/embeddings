@@ -1,4 +1,4 @@
-"""Fastmap.
+"""Fastmap algorithm.
 """
 
 from __future__ import print_function
@@ -37,8 +37,8 @@ def update_residual_distance(D, Y):
     for u in range(size):
         for v in range(size):
             D2[u, v] = D2[u, v] - ((Y[u, :] - Y[v, :]) ** 2).sum()  # this is the original one
-            if D2[u, v] < 0.0:
-                print("D2[%s, %s] = %s" % (u, v, D2[u, v]))
+            # if D2[u, v] < 0.0:
+            #     print("D2[%s, %s] = %s" % (u, v, D2[u, v]))
 
             # D2[u, v] = np.abs(D2[u, v] - ((Y[u, :] - Y[v, :]) ** 2).sum())  # rigged
 
@@ -48,8 +48,7 @@ def update_residual_distance(D, Y):
 def fastmap_textbook(D, k):
     """Fastmap algorithm. Textbook version.
     """
-    Y = np.zeros([len(X), k])
-    D = D_original.copy()
+    Y = np.zeros([D.shape[0], k])
     for i in range(k):
         print("Dimension: %s" % i)
         idx_a, idx_b = find_pivot_points(D)
@@ -118,62 +117,10 @@ def fastmap(X, distance, k, subsample=False, n_clusters=10):
     for i in range(k):
         print("Dimension %s" % i)
         if subsample:
-            idx_a, idx_b = find_pivot_points_scalable(X, distance_euclidean, Y, n_clusters)
+            idx_a, idx_b = find_pivot_points_scalable(X, distance, Y, n_clusters)
         else:
-            idx_a, idx_b = find_pivot_points_from_X_fast(X, distance_euclidean, Y)
+            idx_a, idx_b = find_pivot_points_from_X_fast(X, distance, Y)
 
-        Y[:, i] = projection_from_X(X, distance_euclidean, idx_a, idx_b, Y)
+        Y[:, i] = projection_from_X(X, distance, idx_a, idx_b, Y)
 
     return Y
-
-
-def distance_euclidean(A, B):
-    """Wrapper of the euclidean distance between two vectors, iterables of
-    vectors, etc.
-    """
-    return distance_matrix(np.atleast_2d(A), np.atleast_2d(B))
-
-
-def sph2cart(az, el, r):
-    """Spherical to Cartesian conversion, just for testing.
-    """
-    rcos_theta = r * np.cos(el)
-    x = rcos_theta * np.cos(az)
-    y = rcos_theta * np.sin(az)
-    z = r * np.sin(el)
-    return x, y, z
-
-
-if __name__ == '__main__':
-    from scipy.spatial import distance_matrix
-    
-    np.random.seed(1)
-    N = 100000
-    d = 20
-    X = np.random.uniform(size=(N, d))
-    k = 14
-
-    # alpha = np.random.uniform(low=0.0, high=(2.0 * np.pi), size=N)
-    # beta = np.random.uniform(low=0.0, high=(2.0 * np.pi), size=N)
-    # X = np.array([sph2cart(alpha[i], beta[i], 1.0) for i in range(N)])
-    # k = 2
-
-    if N <= 1000:
-        D_original = distance_matrix(X, X)
-        D = D_original.copy()
-        Y = fastmap_textbook(D, k)
-        DY = distance_matrix(Y, Y)
-        print(np.corrcoef(D_original.flatten(), DY.flatten()))
-
-
-    n_clusters = 10
-    subsample = False
-    n_clusters = 10
-    Y = fastmap(X, distance_euclidean, k, subsample, n_clusters)
-
-    print("Estimating the correlation between original distances and embedded distances.")
-    idx = np.random.permutation(len(X))[:1000]
-    D_sub = distance_matrix(X[idx], X[idx])
-    DY_sub = distance_matrix(Y[idx], Y[idx])
-    print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), DY_sub.flatten())[0, 1]))
-    
