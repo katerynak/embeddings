@@ -197,7 +197,7 @@ if __name__=="__main__":
                 for l in n_landmarks:
                     for stress_seed in range(4):
                         start_time = time.time()
-                        embeddings = lmds.compute_lmds(s, nl=l, k=n, distance=dist.original_distance)
+                        embeddings = lmds.compute_lmds(s, distance=dist.original_distance, nl=l, k=n)
                         comp_time = time.time()-start_time
 
                         original_distances, embedded_distances = utils.eval_distances(s, embeddings,

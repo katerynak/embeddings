@@ -55,27 +55,27 @@ def choose_landmarks_random(n, dataset):
     return np.random.choice(dataset, n, replace=False)
 
 
-def landmark_dist_matrix(landmarks, distance):
-    """
-    computes matrix of distances between landmarks, given the distance
+# def landmark_dist_matrix(landmarks, distance):
+#     """
+#     computes matrix of distances between landmarks, given the distance
 
-    Parameters
-        ----------
-        landmarks: points from dataset
-        distance: original distance function
+#     Parameters
+#         ----------
+#         landmarks: points from dataset
+#         distance: original distance function
 
-    Return
-        ------
-        matrix containing pairwise distances, ndarray
-    """
-    n = len(landmarks)
-    dist_matrix = np.zeros((n, n))
+#     Return
+#         ------
+#         matrix containing pairwise distances, ndarray
+#     """
+#     n = len(landmarks)
+#     dist_matrix = np.zeros((n, n))
 
-    for i in range(n):
-        for j in range(n):
-            dist_matrix[i,j] = distance(landmarks[i], landmarks[j])
+#     for i in range(n):
+#         for j in range(n):
+#             dist_matrix[i,j] = distance(landmarks[i], landmarks[j])
 
-    return dist_matrix
+#     return dist_matrix
 
 
 def landmark_mds(Dl, k):
@@ -85,7 +85,7 @@ def landmark_mds(Dl, k):
     """
     mds = sklearn.manifold.MDS(dissimilarity='precomputed',
                                n_components=k, n_jobs=-1,
-                               metric=False)
+                               metric=False)  # Why?
     return mds.fit_transform(Dl)
 
 
@@ -99,9 +99,7 @@ def eig(distance_matrix, k):
     eigenvalues and corresponding eigenvectors, if among k largest
     eigenvalues there are negative values, function discard them and
     returns only positive eigenvalues and corresponding eigenvectors
-
     """
-
     H = centering_matrix(distance_matrix.shape[0])
     B = -0.5*(np.matmul(np.matmul(H,distance_matrix), H))
     E, U = np.linalg.eig(B)
@@ -116,7 +114,6 @@ def compute_M_sharp(E, U):
     landmarks_euclidean_matrix
     M sharp : E ^ (-1/2) * transpose (U), where
     U is the eigenvectors matrix and E is the diagonal eigenvalue matrix
-
     """
     return np.matmul((np.diag(np.reciprocal(np.power(E,0.5)))), U)
 
@@ -136,23 +133,27 @@ def compute_final_embedding(d_i, M_sharp, mu):
     return y_i.tolist()
 
 
-def compute_lmds(tracks, nl=10, k=4, distance=None):
-    """computes lmds euclidean embeddings of tracks of size k using nl
-    landmarks
+def compute_lmds(dataset, nl=10, k=4, distance=None):
+    """Given a dataset, computes the lMDS Euclidean embedding of size k
+    using nl landmarks. The dataset must be an array.
 
     """
-    if distance is None:
-        distance = dist.original_distance
+    # if distance is None:
+    #     distance = dist.original_distance
 
-    distances, landmarks_idx = dissimilarity.compute_dissimilarity(tracks,
+    distances, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
                                                                    distance=distance,
                                                                    verbose=True,
                                                                    num_prototypes=nl)
-    distances = np.power(distances, 2)
-    landmarks = [tracks[i] for i in landmarks_idx]
+    # distances = np.power(distances, 2)
+    distances *= distances
+    # landmarks = [tracks[i] for i in landmarks_idx]
+    landmarks = dataset[landmarks_idx]
 
-    Dl = landmark_dist_matrix(landmarks, distance=distance)
-    Dl = np.power(Dl, 2)
+    # Dl = landmark_dist_matrix(landmarks, distance=distance)
+    Dl = distance(landmarks, landmarks)
+    # Dl = np.power(Dl, 2)
+    Dl *= Dl
 
     E, U = eig(Dl, k)
     M_sharp = compute_M_sharp(E, U)
@@ -163,5 +164,3 @@ def compute_lmds(tracks, nl=10, k=4, distance=None):
         embeddings.append(compute_final_embedding(d_i, M_sharp, mu))
 
     return embeddings
-
-
