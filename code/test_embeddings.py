@@ -7,11 +7,11 @@ from scipy.spatial import distance_matrix
 from lmds import compute_lmds
     
 
-def distance_euclidean(A, B):
-    """Wrapper of the euclidean distance between two vectors, iterables of
-    vectors, etc.
+def euclidean_distance(A, B):
+    """Wrapper of the euclidean distance between two vectors, or array and
+    vector, or two arrays.
     """
-    return distance_matrix(np.atleast_2d(A), np.atleast_2d(B))
+    return distance_matrix(np.atleast_2d(A), np.atleast_2d(B), p=2)
 
 
 def sph2cart(az, el, r):
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # k = 2
 
     if N <= 1000:
-        D_original = distance_euclidean(X, X)
+        D_original = euclidean_distance(X, X)
         D = D_original.copy()
         Y = fastmap_textbook(D, k)
         DY = distance_matrix(Y, Y)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     n_clusters = 10
     subsample = False
     n_clusters = 10
-    Y = fastmap(X, distance_euclidean, k, subsample, n_clusters)
+    Y = fastmap(X, euclidean_distance, k, subsample, n_clusters)
 
     print("Estimating the correlation between original distances and embedded distances.")
     idx = np.random.permutation(len(X))[:1000]
@@ -56,6 +56,6 @@ if __name__ == '__main__':
     print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), DY_sub.flatten())[0, 1]))
     
     lmds_embeddings = np.array(compute_lmds(X, nl=50, k=k,
-                                            distance=distance_euclidean))
+                                            distance=euclidean_distance))
     D_lmds_sub = distance_matrix(lmds_embeddings[idx], lmds_embeddings[idx])
     print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_lmds_sub.flatten())[0, 1]))
