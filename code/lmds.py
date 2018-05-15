@@ -133,7 +133,7 @@ def compute_final_embedding(d_i, M_sharp, mu):
     return y_i.tolist()
 
 
-def compute_lmds(dataset, nl=10, k=4, distance=None):
+def compute_lmds(dataset, distance=None, nl=10, k=4):
     """Given a dataset, computes the lMDS Euclidean embedding of size k
     using nl landmarks. The dataset must be an array.
 
