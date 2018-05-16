@@ -104,6 +104,7 @@ if __name__=="__main__":
             """
             s_size = 50000
             s = s[s_idx][:s_size]
+            s = np.array(s, dtype=object)
             for (n, A) in zip(k, sizeA):
                 for stress_seed in range(4):
 
@@ -192,15 +193,16 @@ if __name__=="__main__":
             s_size : number of streamlines
             """
             s_size = 50000
-            s = s[s_idx][:s_size]
+            sub_s = np.array(s[s_idx][:s_size], dtype=object)
             for n in k:
                 for l in n_landmarks:
                     for stress_seed in range(4):
                         start_time = time.time()
-                        embeddings = lmds.compute_lmds(s, distance=dist.original_distance, nl=l, k=n)
+                        embeddings = lmds.compute_lmds(sub_s, distance=dist.original_distance, nl=l, k=n)
                         comp_time = time.time()-start_time
 
-                        original_distances, embedded_distances = utils.eval_distances(s, embeddings,
+                        original_distances, embedded_distances = utils.eval_distances(sub_s,
+                                                                                      np.array(embeddings, dtype=object),
                                                                                       num_rows_2_sample=stress_samples,
                                                                                       seed=stress_seed)
                         if 'STRESS' in globals():
