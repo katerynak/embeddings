@@ -48,6 +48,8 @@ def update_residual_distance(D, Y):
 def fastmap_textbook(D, k):
     """Fastmap algorithm. Textbook version.
     """
+    print("THIS IMPLEMENTATION HAS A BUG AND DIFFERS FROM THE FAST ONE!")
+    raise Exception
     Y = np.zeros([D.shape[0], k])
     for i in range(k):
         print("Dimension: %s" % i)
