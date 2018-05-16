@@ -6,6 +6,7 @@ from fastmap import fastmap, fastmap_textbook
 from scipy.spatial import distance_matrix
 from lmds import compute_lmds, compute_lmds2
 from eval_metrics import stress
+from dissimilarity import compute_dissimilarity
     
 
 def euclidean_distance(A, B):
@@ -37,30 +38,31 @@ if __name__ == '__main__':
     # X = np.array([sph2cart(alpha[i], beta[i], 1.0) for i in range(N)])
     # k = 2
 
-    if N <= 1000:
-        D_original = euclidean_distance(X, X)
-        D = D_original.copy()
-        Y = fastmap_textbook(D, k)
-        DY = distance_matrix(Y, Y)
-        print(np.corrcoef(D_original.flatten(), DY.flatten()))
+    print("Estimating the quality of embedded distances vs. original distances.")
 
-
+    print("Fastmap:")
     subsample = False
     n_clusters = 10
     Y = fastmap(X, euclidean_distance, k, subsample, n_clusters)
 
-    print("Estimating the correlation between original distances and embedded distances.")
     idx = np.random.permutation(len(X))[:1000]
     D_sub = distance_matrix(X[idx], X[idx])
     DY_sub = distance_matrix(Y[idx], Y[idx])
     print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), DY_sub.flatten())[0, 1]))
-
     print("Stress : %s" % (stress(D_sub.flatten(), DY_sub.flatten())))
-    
-    lmds_embeddings = np.array(compute_lmds2(X, nl=100, k=k,
+
+    print("lMDS:")
+    lmds_embedding = np.array(compute_lmds2(X, nl=100, k=k,
                                              distance=euclidean_distance,
                                              landmark_policy='sff'))
-    D_lmds_sub = distance_matrix(lmds_embeddings[idx], lmds_embeddings[idx])
+    D_lmds_sub = distance_matrix(lmds_embedding[idx], lmds_embedding[idx])
     print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_lmds_sub.flatten())[0, 1]))
-
     print("Stress : %s" % (stress(D_sub.flatten(), D_lmds_sub.flatten())))
+
+    print("Dissimilarity Representation:")
+    dissimilarity_embedding, prototype_idx = compute_dissimilarity(X, num_prototypes=40,
+                                                                   distance=euclidean_distance,
+                                                                   verbose=False)
+    D_dissimilarity_sub = distance_matrix(dissimilarity_embedding[idx], dissimilarity_embedding[idx])
+    print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_dissimilarity_sub.flatten())[0, 1]))
+    print("Stress : %s" % (stress(D_sub.flatten(), D_dissimilarity_sub.flatten())))
