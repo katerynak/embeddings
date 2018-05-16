@@ -67,7 +67,7 @@ def recursive_distance2(X, idx, distance, Y):
     distance and the (partial) projection Y. Necessary for
     Fastmap. This is a pretty fast implementation.
     """
-    tmp1 = distance(X, X[idx])
+    tmp1 = distance(X, [X[idx]])
     tmp1 *= tmp1
     tmp2 = (Y - Y[idx])
     tmp2 *= tmp2
