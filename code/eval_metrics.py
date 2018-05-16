@@ -9,7 +9,7 @@ def stress_def1(dist_embedd, dist_original):
         s_original+=pow(do,2)
     return float(s_diff/s_original)
 
-def stress(dist_embedd, dist_original):
+def stress2(dist_embedd, dist_original):
     s_diff = 0
     norm_orig = 0
     norm_embedd = 0
@@ -22,6 +22,11 @@ def stress(dist_embedd, dist_original):
     for (de, do) in zip(dist_embedd, dist_original):
         s_diff += pow(float(de/norm_embedd) - float(do/norm_orig), 2)
     return float (s_diff)
+
+
+def stress(dist_embedd, dist_original):
+    tmp = dist_embedd / (dist_embedd * dist_embedd).sum() - dist_original / (dist_original * dist_original).sum()
+    return (tmp * tmp).sum()
 
 
 # def inverse_correlation(dist_embedd, dist_original):
