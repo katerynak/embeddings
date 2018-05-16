@@ -166,3 +166,34 @@ def compute_lmds(dataset, distance=None, nl=10, k=4):
         embeddings.append(compute_final_embedding(d_i, M_sharp, mu))
 
     return embeddings
+
+
+def compute_lmds2(dataset, distance=None, nl=10, k=4, landmark_policy='random'):
+    """Given a dataset, computes the lMDS Euclidean embedding of size k
+    using nl landmarks. The dataset must be an array.
+    """
+    d, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
+                                                           distance=distance,
+                                                           prototype_policy=landmark_policy,
+                                                           verbose=True,
+                                                           num_prototypes=nl)
+    # Use squared distances
+    d *= d
+    D = distance(dataset[landmarks_idx], dataset[landmarks_idx])
+    D *= D
+
+    # Compute cMDS on landmarks and get top k eigenvalues/eigenvectors
+    n = D.shape[0]
+    H = np.identity(n) - (1.0 / n) * np.ones((n, n))
+    B = -0.5 * H.dot(D).dot(H)
+    Lambda, U = np.linalg.eigh(B)  # eigh() because B (and D) must be symmetric
+    U = U.T
+    idx = Lambda.argsort()[::-1]
+    Lambda_plus = Lambda[idx][:k]
+    U_plus = U[idx][:k]
+
+    # Compute M_sharp and the embedding:
+    M_sharp = np.diag(1.0 / np.sqrt(Lambda_plus)).dot(U_plus)
+    Y = (0.5 * M_sharp.dot((D.mean(0) - d).T)).T
+
+    return Y
