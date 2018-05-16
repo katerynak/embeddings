@@ -145,7 +145,7 @@ def compute_lmds(dataset, distance=None, nl=10, k=4):
     distances, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
                                                                    distance=distance,
                                                                    prototype_policy='random',
-                                                                   verbose=True,
+                                                                   verbose=False,
                                                                    num_prototypes=nl)
     # distances = np.power(distances, 2)
     distances *= distances
@@ -175,7 +175,7 @@ def compute_lmds2(dataset, distance=None, nl=10, k=4, landmark_policy='random'):
     d, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
                                                            distance=distance,
                                                            prototype_policy=landmark_policy,
-                                                           verbose=True,
+                                                           verbose=False,
                                                            num_prototypes=nl)
     # Use squared distances
     d *= d
