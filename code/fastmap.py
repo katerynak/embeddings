@@ -110,12 +110,14 @@ def projection_from_X(X, distance, idx_a, idx_b, Y):
     return Yj
 
 
-def fastmap(X, distance, k, subsample=False, n_clusters=10):
+def fastmap(X, distance, k, subsample=False, n_clusters=10, verbose=False):
     """Fastmap algorithm. This is a pretty fast implementation.
     """
     Y = np.zeros([len(X), k])
     for i in range(k):
-        print("Dimension %s" % i)
+        if verbose:
+            print("Dimension %s" % i)
+
         if subsample:
             idx_a, idx_b = find_pivot_points_scalable(X, distance, Y, n_clusters)
         else:
