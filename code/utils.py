@@ -37,7 +37,7 @@ def eval_distances(streamlines, embeddings, num_rows_2_sample, original_distance
     # print ("streamline normale: ", flatt([embedding[0]])[0])
     # print ("streamline reverse: ", flatt(flatt([embedding[0][::-1]])))
     for (idx0, idx1) in idx_comb:
-        original_distances.append(original_distance(streamlines[idx0], streamlines[idx1]))
+        original_distances.append(original_distance([streamlines[idx0]], [streamlines[idx1]]))
         embedded_distances.append(embedded_distance(embeddings[idx0], embeddings[idx1]))
         # embedded_distances.append(d.original_distance(embedding[idx0], embedding[idx1]))
         # embedded_distances.append(d.mdf2(embedding[idx0], embedding[idx1],nb_points))
