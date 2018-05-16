@@ -48,21 +48,21 @@ if __name__ == '__main__':
     idx = np.random.permutation(len(X))[:1000]
     D_sub = distance_matrix(X[idx], X[idx])
     DY_sub = distance_matrix(Y[idx], Y[idx])
-    print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), DY_sub.flatten())[0, 1]))
-    print("Stress : %s" % (stress(D_sub.flatten(), DY_sub.flatten())))
+    print("  Correlation: %s" % (np.corrcoef(D_sub.flatten(), DY_sub.flatten())[0, 1]))
+    print("  Stress : %s" % (stress(D_sub.flatten(), DY_sub.flatten())))
 
     print("lMDS:")
     lmds_embedding = np.array(compute_lmds2(X, nl=100, k=k,
                                              distance=euclidean_distance,
                                              landmark_policy='sff'))
     D_lmds_sub = distance_matrix(lmds_embedding[idx], lmds_embedding[idx])
-    print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_lmds_sub.flatten())[0, 1]))
-    print("Stress : %s" % (stress(D_sub.flatten(), D_lmds_sub.flatten())))
+    print("  Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_lmds_sub.flatten())[0, 1]))
+    print("  Stress : %s" % (stress(D_sub.flatten(), D_lmds_sub.flatten())))
 
     print("Dissimilarity Representation:")
     dissimilarity_embedding, prototype_idx = compute_dissimilarity(X, num_prototypes=40,
                                                                    distance=euclidean_distance,
                                                                    verbose=False)
     D_dissimilarity_sub = distance_matrix(dissimilarity_embedding[idx], dissimilarity_embedding[idx])
-    print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_dissimilarity_sub.flatten())[0, 1]))
-    print("Stress : %s" % (stress(D_sub.flatten(), D_dissimilarity_sub.flatten())))
+    print("  Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_dissimilarity_sub.flatten())[0, 1]))
+    print("  Stress : %s" % (stress(D_sub.flatten(), D_dissimilarity_sub.flatten())))
