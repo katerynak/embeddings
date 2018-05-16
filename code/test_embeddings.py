@@ -4,7 +4,7 @@
 import numpy as np
 from fastmap import fastmap, fastmap_textbook
 from scipy.spatial import distance_matrix
-from lmds import compute_lmds
+from lmds import compute_lmds, compute_lmds2
 from eval_metrics import stress
     
 
@@ -45,7 +45,6 @@ if __name__ == '__main__':
         print(np.corrcoef(D_original.flatten(), DY.flatten()))
 
 
-    n_clusters = 10
     subsample = False
     n_clusters = 10
     Y = fastmap(X, euclidean_distance, k, subsample, n_clusters)
@@ -58,8 +57,9 @@ if __name__ == '__main__':
 
     print("Stress : %s" % (stress(D_sub.flatten(), DY_sub.flatten())))
     
-    lmds_embeddings = np.array(compute_lmds(X, nl=50, k=k,
-                                            distance=euclidean_distance))
+    lmds_embeddings = np.array(compute_lmds2(X, nl=100, k=k,
+                                             distance=euclidean_distance,
+                                             landmark_policy='sff'))
     D_lmds_sub = distance_matrix(lmds_embeddings[idx], lmds_embeddings[idx])
     print("Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_lmds_sub.flatten())[0, 1]))
 
