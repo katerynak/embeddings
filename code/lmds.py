@@ -102,7 +102,8 @@ def eig(distance_matrix, k):
     """
     H = centering_matrix(distance_matrix.shape[0])
     B = -0.5*(np.matmul(np.matmul(H,distance_matrix), H))
-    E, U = np.linalg.eig(B)
+    E, U = np.linalg.eigh(B)
+    U = np.transpose(U)
     sorted_idx = np.argsort(E)[::-1][:k]
     posE = sum(x > 0 for x in E[sorted_idx])
     sorted_idx = sorted_idx[:posE]
@@ -143,6 +144,7 @@ def compute_lmds(dataset, distance=None, nl=10, k=4):
 
     distances, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
                                                                    distance=distance,
+                                                                   prototype_policy='random',
                                                                    verbose=True,
                                                                    num_prototypes=nl)
     # distances = np.power(distances, 2)
