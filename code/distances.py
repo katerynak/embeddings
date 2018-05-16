@@ -3,8 +3,11 @@ from dipy.tracking.distances import bundles_distances_mam
 from dipy.tracking.distances import bundles_distances_mdf
 from load import flatt
 
+# def original_distance(a,b):
+#     return bundles_distances_mam([a], [b])
+
 def original_distance(a,b):
-    return bundles_distances_mam([a], [b])
+    return bundles_distances_mam(a, b)
 
 def euclidean_distance(a,b):
     return np.linalg.norm(np.asarray(a)-np.asarray(b))
