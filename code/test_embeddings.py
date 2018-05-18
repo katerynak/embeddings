@@ -72,14 +72,15 @@ if __name__ == '__main__':
     print("  Stress : %s" % (stress(D_sub.flatten(), DY_sub.flatten())))
 
     print("lMDS:")
-    lmds_embedding = np.array(compute_lmds2(X, nl=100, k=k,
-                                            distance=distance,
-                                            landmark_policy='sff'))
+    lmds_embedding = np.array(compute_lmds(X, nl=100, k=k,
+                                           distance=distance,
+                                           landmark_policy='sff'))
     D_lmds_sub = distance_matrix(lmds_embedding[idx], lmds_embedding[idx])
     print("  Correlation: %s" % (np.corrcoef(D_sub.flatten(), D_lmds_sub.flatten())[0, 1]))
     print("  Stress : %s" % (stress(D_sub.flatten(), D_lmds_sub.flatten())))
 
     print("Dissimilarity Representation:")
+    distance = bundles_distances_mam
     dissimilarity_embedding, prototype_idx = compute_dissimilarity(X, num_prototypes=40,
                                                                    distance=distance,
                                                                    verbose=False)
