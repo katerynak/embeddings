@@ -67,7 +67,7 @@ def recursive_distance2(X, idx, distance, Y):
     distance and the (partial) projection Y. Necessary for
     Fastmap. This is a pretty fast implementation.
     """
-    tmp1 = distance(X, [X[idx]])
+    tmp1 = distance(X, np.array([X[idx]]))
     tmp1 *= tmp1
     tmp2 = (Y - Y[idx])
     tmp2 *= tmp2
@@ -99,14 +99,14 @@ def find_pivot_points_scalable(X, distance, Y, k, permutation=True, c=2.0):
     return idx[tmp_a], idx[tmp_b]
 
 
-def projection_from_X(X, distance, idx_a, idx_b, Y):
+def projection_from_X(X, distance, idx_a, idx_b, Y, eps=1.0e-10):
     """Compute projections of objects X, given a distance function, two
     indices of pivot points (idx_a, idx_b), and their partial
     projection Y.
 
     """
     tmp1 = recursive_distance2(X, idx_a, distance, Y)
-    tmp2 = tmp1[idx_b]
+    tmp2 = tmp1[idx_b] + eps
     tmp3 = recursive_distance2(X, idx_b, distance, Y)
     Yj = (tmp1 + tmp2 - tmp3) / (2.0 * np.sqrt(tmp2))
     return Yj
