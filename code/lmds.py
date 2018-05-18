@@ -134,7 +134,7 @@ def compute_final_embedding(d_i, M_sharp, mu):
     return y_i.tolist()
 
 
-def compute_lmds(dataset, distance=None, nl=10, k=4):
+def compute_lmds2(dataset, distance=None, nl=10, k=4, landmark_policy='random'):
     """Given a dataset, computes the lMDS Euclidean embedding of size k
     using nl landmarks. The dataset must be an array.
 
@@ -144,7 +144,7 @@ def compute_lmds(dataset, distance=None, nl=10, k=4):
 
     distances, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
                                                                    distance=distance,
-                                                                   prototype_policy='random',
+                                                                   prototype_policy=landmark_policy,
                                                                    verbose=False,
                                                                    num_prototypes=nl)
     # distances = np.power(distances, 2)
@@ -168,15 +168,16 @@ def compute_lmds(dataset, distance=None, nl=10, k=4):
     return embeddings
 
 
-def compute_lmds2(dataset, distance=None, nl=10, k=4, landmark_policy='random'):
+def compute_lmds(dataset, distance=None, nl=10, k=4, landmark_policy='random'):
     """Given a dataset, computes the lMDS Euclidean embedding of size k
     using nl landmarks. The dataset must be an array.
     """
-    d, landmarks_idx = dissimilarity.compute_dissimilarity(dataset,
-                                                           distance=distance,
-                                                           prototype_policy=landmark_policy,
-                                                           verbose=False,
-                                                           num_prototypes=nl)
+    landmarks_idx = dissimilarity.compute_prototypes(dataset, num_prototypes=nl,
+                                                     distance=distance,
+                                                     prototype_policy=landmark_policy)
+
+    d = distance(dataset, dataset[landmarks_idx])
+
     # Use squared distances
     d *= d
     D = distance(dataset[landmarks_idx], dataset[landmarks_idx])
