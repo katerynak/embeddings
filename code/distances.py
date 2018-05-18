@@ -45,7 +45,7 @@ def mdf2(a,b):
     return (min(sum_dist, sum_dist_flip))/len([a][0])
 
 
-def parallel_distance_computation(distance, A, B, n_jobs=-1, verbose=True):
+def parallel_distance_computation(A, B, distance, n_jobs=-1, granularity=2, verbose=False):
     """Computes the distance matrix between all objects in A and all
     objects in B in parallel over all cores.
     """
@@ -57,7 +57,7 @@ def parallel_distance_computation(distance, A, B, n_jobs=-1, verbose=True):
             print("Parallel computation of the dissimilarity matrix: %s cpus." % n_jobs)
 
         if n_jobs > 1:
-            tmp = np.linspace(0, len(A), 2 * n_jobs + 1).astype(np.int)
+            tmp = np.linspace(0, len(A), granularity * n_jobs + 1).astype(np.int)
         else:  # corner case: joblib detected 1 cpu only.
             tmp = (0, len(A))
 
