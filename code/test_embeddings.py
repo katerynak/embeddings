@@ -4,18 +4,11 @@
 import numpy as np
 from fastmap import fastmap, fastmap_textbook
 from scipy.spatial import distance_matrix
-from lmds import compute_lmds, compute_lmds2
+from lmds import compute_lmds
 from eval_metrics import stress
 from dissimilarity import compute_dissimilarity
 from distances import euclidean_distance, parallel_distance_computation
 from functools import partial
-
-
-# def euclidean_distance(A, B):
-#     """Wrapper of the euclidean distance between two vectors, or array and
-#     vector, or two arrays.
-#     """
-#     return distance_matrix(np.atleast_2d(A), np.atleast_2d(B), p=2)
 
 
 def sph2cart(az, el, r):
