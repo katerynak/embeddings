@@ -181,6 +181,23 @@ def dissimilarity(tracks, prototypes, distance=bundles_distances_mam,
     return dissimilarity_matrix
 
 
+def compute_prototypes(tracks, num_prototypes, distance, prototype_policy='sff'):
+    if prototype_policy == 'random':
+        prototype_idx = np.random.permutation(len(tracks))[:num_prototypes]
+    elif prototype_policy == 'fft':
+        prototype_idx = furthest_first_traversal(tracks,
+                                                 num_prototypes, distance)
+    elif prototype_policy == 'sff':
+        prototype_idx = subset_furthest_first(tracks, num_prototypes, distance)
+    else:
+        if verbose:
+            print("Prototype selection policy not supported: %s" % prototype_policy)
+
+        raise Exception
+
+    return prototype_idx
+
+
 def compute_dissimilarity(tracks, num_prototypes=40,
                           distance=bundles_distances_mam,
                           prototype_policy='sff',
@@ -224,19 +241,8 @@ def compute_dissimilarity(tracks, num_prototypes=40,
     if verbose:
         print("Generating %s prototypes with policy %s." % (num_prototypes, prototype_policy))
 
-    if prototype_policy == 'random':
-        prototype_idx = np.random.permutation(len(tracks))[:num_prototypes]
-    elif prototype_policy == 'fft':
-        prototype_idx = furthest_first_traversal(tracks,
-                                                 num_prototypes, distance)
-    elif prototype_policy == 'sff':
-        prototype_idx = subset_furthest_first(tracks, num_prototypes, distance)
-    else:
-        if verbose:
-            print("Prototype selection policy not supported: %s" % prototype_policy)
-
-        raise Exception
-
+    prototype_idx = compute_prototypes(tracks, num_prototypes, distance,
+                                        prototype_policy=prototype_policy)
     prototypes = [tracks[i] for i in prototype_idx]
     dissimilarity_matrix = dissimilarity(tracks, prototypes, distance,
                                          n_jobs=n_jobs, verbose=verbose)
