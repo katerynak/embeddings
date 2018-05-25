@@ -32,20 +32,37 @@ class Statistics:
         """
         return self.data.columns.tolist()
 
-    def plot(self, varx, vary, outFile):
+    def plot(self, varx, vary, outFile, **kwargs):
         """
         plots varx and vary with mean and standard deviation of vary wrt varx
         varx, vary, outFile are strings
         """
+
+        outData = self.data
+
+        """
+        filtering results satisfying query
+        """
+        #python2
+        #for k, v in kwargs.iteritems():
+
+        #python3
+        for k, v in kwargs.items():
+            outData = outData.loc[outData[k] == v]
+        print(outData)
+
         self.fig = plt.figure()
-        outData = self.data[[varx, vary]].astype('float')
+        outData = outData[[varx, vary]].astype('float')
         y = outData.groupby(varx)[vary].mean()
         x = y.index.tolist()
         std = outData.groupby(varx)[vary].std()
-        plt.plot(x, y.tolist(), 'k', color='#1B2ACC')
+        plt.semilogy(x, y.tolist(), 'k', color='#1B2ACC')
+        #plt.plot(x, y.tolist(), 'k', color='#1B2ACC')
         #plt.plot(x=x, y=y.tolist(), fmt='k')
         plt.fill_between(x, (y - std/2.).tolist(), (y + std/2.).tolist(), alpha=0.2, edgecolor='#1B2ACC', facecolor='#089FFF',
                          linewidth=1, antialiased=True)
+        plt.ylabel(vary)
+        plt.xlabel(varx)
         plt.show()
         self.fig.savefig(outFile)
 
@@ -53,5 +70,8 @@ class Statistics:
 
 if __name__=="__main__":
     st = Statistics("../eval_results/lmds/")
-    st.plot('k', 'stress', './file.pdf')
-    st.plot('n_landmarks', 'stress', './file.pdf')
+    st.plot('embedding_size', 'stress', './file.pdf', eval_streamlines=1000,
+            n_landmarks=50)
+    st.plot('embedding_size', 'distortion', './file.pdf')
+    st.plot('embedding_size', 'correlation', './file.pdf')
+    st.plot('embedding_size', 'exec_time', './file.pdf')
