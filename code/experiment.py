@@ -90,7 +90,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, eval_seeds):
                 f.write('n_streamlines\t' + str(len(s)) + '\n')
                 f.write('eval_streamlines\t' + str(len(idx)) + '\n')
                 f.write('exec_time\t' + str(comp_time) + '\n')
-                f.write('resampling_points\t' + str(n) + '\n')
+                f.write('n_prototypes\t' + str(n) + '\n')
 
 
 def lipshitz_eval(s, original_dist_matrixes, idxs, eval_seeds):
