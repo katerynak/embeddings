@@ -30,7 +30,7 @@ def compute_reference_sets_linial1994(dataset, k):
 
 
 def compute_distance_from_reference_set(object, A, distance_function):
-    return np.min([distance_function(object, x) for x in A])
+    return np.min([distance_function([object], [x]) for x in A])
 
 
 def compute_distance_from_reference_sets(object, R, distance_function):
