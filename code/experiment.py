@@ -4,6 +4,7 @@ from scipy.spatial.distance import pdist
 from euclidean_embeddings.evaluation_metrics import stress, correlation, distortion
 import os
 import time
+from argparse import ArgumentParser
 from euclidean_embeddings.distances import euclidean_distance, parallel_distance_computation
 from functools import partial
 import nibabel as nib
@@ -68,7 +69,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, eval_seeds):
 
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
 
-    num_prototypes = np.linspace(10, 30, 3)
+    num_prototypes = [2, 4, 8, 10, 12, 20, 30, 40]
 
     for n in num_prototypes:
         start_time = time.time()
@@ -236,6 +237,14 @@ def load(filename="data/sub-100307/sub-100307_var-FNAL_tract.trk"):
 
 if __name__ == '__main__':
 
+    parser = ArgumentParser()
+    parser.add_argument("seed")
+    args = parser.parse_args()
+
+    seed = args.seed
+
+    print(seed)
+
     sl = load()
     s = np.array(sl, dtype=np.object)
 
@@ -247,13 +256,17 @@ if __name__ == '__main__':
     # sl = sl[idx]
 
     #precompute original distance matrixes for stress evaluation
+
+
     stress_samples = [100, 1000]
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
     original_dist_matrixes = []
     idxs = []
 
     #try different seeds if needed
-    seeds = [1,2,3,4]
+
+    r = np.random.RandomState(seed)
+    seeds = r.randint(0,10000,4)
     data_seeds = []
     for seed in seeds:
         np.random.seed(seed)
@@ -264,7 +277,7 @@ if __name__ == '__main__':
             data_seeds.append(seed)
 
     #resampling_eval(sl, original_dist_matrixes, idxs, data_seeds)
-    dissimilarity_eval(s, original_dist_matrixes, idxs, data_seeds)
+    #dissimilarity_eval(s, original_dist_matrixes, idxs, data_seeds)
     #lmds_eval(s, original_dist_matrixes, idxs, data_seeds)
     #lipshitz_eval(s, original_dist_matrixes, idxs, data_seeds)
     #fastmap_eval(s, original_dist_matrixes, idxs, data_seeds)
