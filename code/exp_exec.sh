@@ -8,7 +8,7 @@ for t in "${tracks[@]}"
             do
                 for i in `seq 10 20`;
                         do
-                                python experiment.py $i $j
+                                python experiment.py $i $j $t
                         done
             done
     done
