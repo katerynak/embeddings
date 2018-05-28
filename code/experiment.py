@@ -10,7 +10,7 @@ from functools import partial
 import nibabel as nib
 from dipy.tracking.distances import bundles_distances_mam
 
-def resampling_eval(s, original_dist_matrixes, idxs, eval_seeds):
+def resampling_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
      given array of resampling embedding of streamlines s
@@ -24,10 +24,11 @@ def resampling_eval(s, original_dist_matrixes, idxs, eval_seeds):
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
-    max_len = np.max([len(i) for i in s])
+    #max_len = np.max([len(i) for i in s])
 
-    sampling_n = np.geomspace(12, max_len, num=10)
-    sampling_n = sampling_n.astype(int)
+    #sampling_n = np.geomspace(12, max_len, num=10)
+    #sampling_n = sampling_n.astype(int)
+    sampling_n = [12, 18, 27, 41, 63, 95, 144, 218, 330, 501]
     for n in sampling_n:
         start_time = time.time()
         embeddings = set_number_of_points(s, nb_points=n)
@@ -40,7 +41,7 @@ def resampling_eval(s, original_dist_matrixes, idxs, eval_seeds):
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
             #write results to file
-            resFileName = "resampling_pts_{0}__eval_seed_{1}__eval_streamlines_{2}__emb_streamlines{3}".format(n, eval_seed, len(idx), len(s))
+            resFileName = "resampling_pts_{0}__eval_seed_{1}__eval_streamlines_{2}__emb_streamlines{3}__track_{4}".format(n, eval_seed, len(idx), len(s), track)
             with open(results_dir + resFileName, 'w') as f:
                 f.write('stress\t' + str(emb_stress) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
@@ -51,7 +52,7 @@ def resampling_eval(s, original_dist_matrixes, idxs, eval_seeds):
                 f.write('resampling_points\t' + str(n) + '\n')
 
 
-def dissimilarity_eval(s, original_dist_matrixes, idxs, eval_seeds):
+def dissimilarity_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
      given array of dissimilarity embedding of streamlines s
@@ -83,7 +84,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, eval_seeds):
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
             # write results to file
-            resFileName = "num_prototypes_{0}__eval_seed_{1}__n_streamlines_{2}".format(n, eval_seed, len(idx))
+            resFileName = "num_prototypes_{0}__eval_seed_{1}__n_streamlines_{2}__track_{3}".format(n, eval_seed, len(idx), track)
             with open(results_dir + resFileName, 'w') as f:
                 f.write('stress\t' + str(emb_stress) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
@@ -94,7 +95,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, eval_seeds):
                 f.write('n_prototypes\t' + str(n) + '\n')
 
 
-def lipshitz_eval(s, original_dist_matrixes, idxs, eval_seeds):
+def lipshitz_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
      given array of lipschitz embedding of streamlines s
@@ -128,7 +129,7 @@ def lipshitz_eval(s, original_dist_matrixes, idxs, eval_seeds):
             emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
-            resFileName = "n_reference_objects_{0}__eval_seed_{1}__n_streamlines_{2}".format(n, eval_seed, len(idx))
+            resFileName = "n_reference_objects_{0}__eval_seed_{1}__n_streamlines_{2}__track_{3}".format(n, eval_seed, len(idx), track)
             with open(results_dir + resFileName, 'w') as f:
                 f.write('stress\t' + str(emb_stress) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
@@ -140,7 +141,7 @@ def lipshitz_eval(s, original_dist_matrixes, idxs, eval_seeds):
                 f.write('object_sizes\t' + ' '.join([str(x) for x in A]) + '\n')
 
 
-def lmds_eval(s, original_dist_matrixes, idxs, eval_seeds):
+def lmds_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
      given array of lmds embedding of streamlines s
@@ -173,8 +174,8 @@ def lmds_eval(s, original_dist_matrixes, idxs, eval_seeds):
                 emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
                 emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
-                resFileName = "n_landmarks__{0}__embedding_size_{1}__eval_seed_{2}__n_streamlines_{3}".format(l, n,
-                                                                                                              eval_seed, len(idx))
+                resFileName = "n_landmarks__{0}__embedding_size_{1}__eval_seed_{2}__n_streamlines_{3}__track_{4}".format(l, n,
+                                                                                                              eval_seed, len(idx), track)
                 with open(results_dir + resFileName, 'w') as f:
                     f.write('stress\t' + str(emb_stress) + '\n')
                     f.write('correlation\t' + str(emb_correlation) + '\n')
@@ -186,7 +187,7 @@ def lmds_eval(s, original_dist_matrixes, idxs, eval_seeds):
                     f.write('embedding_size\t' + str(n) + '\n')
 
 
-def fastmap_eval(s, original_dist_matrixes, idxs, eval_seeds):
+def fastmap_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
      given array of fastmap embedding of streamlines s
@@ -217,7 +218,7 @@ def fastmap_eval(s, original_dist_matrixes, idxs, eval_seeds):
             emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
-            resFileName = "embedding_size_{0}__eval_seed_{1}__n_streamlines_{2}".format(n,eval_seed,len(idx))
+            resFileName = "embedding_size_{0}__eval_seed_{1}__n_streamlines_{2}__track_{3}".format(n,eval_seed,len(idx), track)
             with open(results_dir + resFileName, 'w') as f:
                 f.write('stress\t' + str(emb_stress) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
@@ -239,18 +240,21 @@ if __name__ == '__main__':
 
     parser = ArgumentParser()
     parser.add_argument("seed")
+    parser.add_argument("embedding")
+    parser.add_argument("trk_num")
     args = parser.parse_args()
 
     seed = args.seed
+    embedding = args.embedding
+    track = args.trk_num
+    filename = "data/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
 
-    print(seed)
-
-    sl = load()
+    sl = load(filename)
     s = np.array(sl, dtype=np.object)
 
     #comment following lines if all data is used
 
-    # s_size = 100
+    # s_size = 10000
     # idx = np.random.permutation(s.shape[0])[:s_size]
     # s = s[idx]
     # sl = sl[idx]
@@ -265,7 +269,7 @@ if __name__ == '__main__':
 
     #try different seeds if needed
 
-    r = np.random.RandomState(seed)
+    r = np.random.RandomState(int(seed))
     seeds = r.randint(0,10000,4)
     data_seeds = []
     for seed in seeds:
@@ -276,8 +280,13 @@ if __name__ == '__main__':
             original_dist_matrixes.append(distances[np.triu_indices(len(distances), 1)])
             data_seeds.append(seed)
 
-    #resampling_eval(sl, original_dist_matrixes, idxs, data_seeds)
-    #dissimilarity_eval(s, original_dist_matrixes, idxs, data_seeds)
-    #lmds_eval(s, original_dist_matrixes, idxs, data_seeds)
-    #lipshitz_eval(s, original_dist_matrixes, idxs, data_seeds)
-    #fastmap_eval(s, original_dist_matrixes, idxs, data_seeds)
+    if(embedding=="lipschitz"):
+        lipshitz_eval(s, original_dist_matrixes, idxs, data_seeds, track)
+    if(embedding=="lmds"):
+        lmds_eval(s, original_dist_matrixes, idxs, data_seeds, track)
+    if(embedding=="fastmap"):
+        fastmap_eval(s, original_dist_matrixes, idxs, data_seeds, track)
+    if(embedding=="dissimilarity"):
+        dissimilarity_eval(s, original_dist_matrixes, idxs, data_seeds, track)
+    if(embedding=="resampling"):
+        resampling_eval(sl, original_dist_matrixes, idxs, data_seeds, track)
