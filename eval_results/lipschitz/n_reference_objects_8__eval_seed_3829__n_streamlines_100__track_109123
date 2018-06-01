@@ -1,0 +1,8 @@
+stress	5.47802251739e-09
+correlation	0.677334806438
+distortion	12.74509378
+n_streamlines	520971
+eval_streamlines	100
+exec_time	844.151316881
+n_reference_objects	8
+object_sizes	2 2 4 4 8 8 8 8
