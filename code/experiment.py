@@ -10,6 +10,7 @@ from functools import partial
 import nibabel as nib
 from dipy.tracking.distances import bundles_distances_mam
 
+
 def resampling_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
@@ -174,7 +175,7 @@ def lmds_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
                 emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
                 emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
-                resFileName = "n_landmarks__{0}__embedding_size_{1}__eval_seed_{2}__n_streamlines_{3}__track_{4}".format(l, n,
+                resFileName = "n_landmarks__{0}__embedding_size_{1}__eval_seed_{2}__n_streamlines_{3}__track_{4}".format(l, len(embeddings[0]),
                                                                                                               eval_seed, len(idx), track)
                 with open(results_dir + resFileName, 'w') as f:
                     f.write('stress\t' + str(emb_stress) + '\n')
@@ -184,7 +185,8 @@ def lmds_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
                     f.write('eval_streamlines\t' + str(len(idx)) + '\n')
                     f.write('exec_time\t' + str(comp_time) + '\n')
                     f.write('n_landmarks\t' + str(l) + '\n')
-                    f.write('embedding_size\t' + str(n) + '\n')
+                    f.write('required_emb_size\t' + str(n) + '\n')
+                    f.write('embedding_size\t' + str(len(embeddings[0])) + '\n')
 
 
 def fastmap_eval(s, original_dist_matrixes, idxs, eval_seeds, track):
@@ -236,6 +238,7 @@ def load(filename="data/sub-100307/sub-100307_var-FNAL_tract.trk"):
     print("%s streamlines" % len(s))
     return s
 
+
 if __name__ == '__main__':
 
     parser = ArgumentParser()
@@ -261,7 +264,6 @@ if __name__ == '__main__':
 
     #precompute original distance matrixes for stress evaluation
 
-
     stress_samples = [100, 1000]
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
     original_dist_matrixes = []
@@ -270,7 +272,7 @@ if __name__ == '__main__':
     #try different seeds if needed
 
     r = np.random.RandomState(int(seed))
-    seeds = r.randint(0,10000,4)
+    seeds = r.randint(0, 10000, 4)
     data_seeds = []
     for seed in seeds:
         np.random.seed(seed)
@@ -280,13 +282,13 @@ if __name__ == '__main__':
             original_dist_matrixes.append(distances[np.triu_indices(len(distances), 1)])
             data_seeds.append(seed)
 
-    if(embedding=="lipschitz"):
+    if embedding == "lipschitz":
         lipshitz_eval(s, original_dist_matrixes, idxs, data_seeds, track)
-    if(embedding=="lmds"):
+    if embedding == "lmds":
         lmds_eval(s, original_dist_matrixes, idxs, data_seeds, track)
-    if(embedding=="fastmap"):
+    if embedding == "fastmap":
         fastmap_eval(s, original_dist_matrixes, idxs, data_seeds, track)
-    if(embedding=="dissimilarity"):
+    if embedding == "dissimilarity":
         dissimilarity_eval(s, original_dist_matrixes, idxs, data_seeds, track)
-    if(embedding=="resampling"):
+    if embedding == "resampling":
         resampling_eval(sl, original_dist_matrixes, idxs, data_seeds, track)
