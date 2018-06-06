@@ -242,7 +242,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     track = args.trk_num
-    filename = "data/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
+    filename = "data/fna-ifof/deterministic_tracking_dipy_FNAL/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
 
     sl = load(filename)
     s = np.array(sl, dtype=np.object)
