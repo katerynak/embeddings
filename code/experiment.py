@@ -10,6 +10,9 @@ from functools import partial
 import nibabel as nib
 from dipy.tracking.distances import bundles_distances_mam
 import os.path
+import sys
+
+sys.path.insert(0, './euclidean_embeddings')
 
 
 def resampling_eval(s, original_dist_matrixes, idxs, exec_number, track):
@@ -69,7 +72,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, exec_number, track):
     :return:
     """
 
-    from euclidean_embeddings.dissimilarity import compute_dissimilarity
+    from dissimilarity import compute_dissimilarity
 
     results_dir = "../eval_results/dissimilarity/"
     if not os.path.exists(results_dir):
@@ -99,7 +102,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, exec_number, track):
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
 
             # write results to file
-           with open(results_dir + resFileName, 'w') as f:
+            with open(results_dir + resFileName, 'w') as f:
                 f.write('stress\t' + str(emb_stress) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
                 f.write('distortion\t' + str(emb_distortion) + '\n')
@@ -172,7 +175,7 @@ def lmds_eval(s, original_dist_matrixes, idxs, exec_number, track):
     :param eval_seeds: list of seeds used for data sampling
     :return:
     """
-    from euclidean_embeddings.lmds import compute_lmds
+    from lmds import compute_lmds
 
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
 
@@ -227,7 +230,7 @@ def fastmap_eval(s, original_dist_matrixes, idxs, exec_number, track):
     :param eval_seeds: list of seeds used for data sampling
     :return:
     """
-    from euclidean_embeddings.fastmap import compute_fastmap
+    from fastmap import compute_fastmap
 
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
 
