@@ -92,7 +92,7 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, exec_number, track):
                 f.write('n_prototypes\t' + str(n) + '\n')
 
 
-def lipshitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
+def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
     """
     function evaluates stress, correlation distance, distortion and embedding computation time
      given array of lipschitz embedding of streamlines s
@@ -238,10 +238,12 @@ def load(filename="data/sub-100307/sub-100307_var-FNAL_tract.trk"):
 if __name__ == '__main__':
 
     parser = ArgumentParser()
+    parser.add_argument("embedding")
     parser.add_argument("trk_num")
     args = parser.parse_args()
 
     track = args.trk_num
+    embedding = args.embedding
     filename = "data/fna-ifof/deterministic_tracking_dipy_FNAL/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
 
     sl = load(filename)
@@ -264,13 +266,19 @@ if __name__ == '__main__':
     distances = distance(s[idxs[-1]], s[idxs[-1]])
     original_dist_matrixes = [(distances[np.triu_indices(len(distances), 1)])]
 
-    for i in range(100):
-        lipshitz_eval(s, original_dist_matrixes, idxs, i, track)
+    for i in range(6, 100):
 
-        lmds_eval(s, original_dist_matrixes, idxs, i,  track)
+        if embedding=="lipschitz":
+            lipschitz_eval(s, original_dist_matrixes, idxs, i, track)
 
-        fastmap_eval(s, original_dist_matrixes, idxs, i, track)
+        elif embedding=="lmds":
+            lmds_eval(s, original_dist_matrixes, idxs, i,  track)
 
-        dissimilarity_eval(s, original_dist_matrixes, idxs, i, track)
+        elif embedding=="fastmap":
+            fastmap_eval(s, original_dist_matrixes, idxs, i, track)
 
-        resampling_eval(sl, original_dist_matrixes, idxs, i, track)
+        elif embedding=="dissimilarity" :
+            dissimilarity_eval(s, original_dist_matrixes, idxs, i, track)
+
+        elif embedding=="resampling" :
+            resampling_eval(sl, original_dist_matrixes, idxs, i, track)
