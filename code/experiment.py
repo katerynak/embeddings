@@ -123,7 +123,7 @@ def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
     :return:
     """
 
-    import lipschitz
+    from lipschitz import compute_lipschitz
 
     results_dir = "../eval_results/lipschitz/"
     if not os.path.exists(results_dir):
@@ -131,9 +131,11 @@ def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
 
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
 
-    k = [2, 4, 8, 16]
-    sizeA = [[2, 4], [2, 2, 4, 4], [2, 2, 4, 4, 8, 8, 8, 8],
-             [2, 2, 4, 4, 8, 8, 8, 8, 16, 16, 16, 16, 16, 16, 16, 16]]
+    k = [2, 4, 8, 10, 12, 20, 30, 40]
+
+    # k = [2, 4, 8, 16]
+    # sizeA = [[2, 4], [2, 2, 4, 4], [2, 2, 4, 4, 8, 8, 8, 8],
+    #          [2, 2, 4, 4, 8, 8, 8, 8, 16, 16, 16, 16, 16, 16, 16, 16]]
 
     for (n, A) in zip(k, sizeA):
         start_time = time.time()
@@ -309,19 +311,22 @@ if __name__ == '__main__':
     distances = distance(s[idxs[-1]], s[idxs[-1]])
     original_dist_matrixes = [(distances[np.triu_indices(len(distances), 1)])]
 
-    for i in range(1, 100):
-
-        if embedding=="lipschitz":
+    if embedding=="lipschitz":
+        for i in range(1, 100):
             lipschitz_eval(s, original_dist_matrixes, idxs, i, track)
 
-        if embedding=="lmds":
+    if embedding=="lmds":
+        for i in range(1, 100):
             lmds_eval(s, original_dist_matrixes, idxs, i,  track)
 
-        if embedding=="fastmap":
+    if embedding=="fastmap":
+        for i in range(1, 100):
             fastmap_eval(s, original_dist_matrixes, idxs, i, track)
 
-        if embedding=="dissimilarity" :
+    if embedding=="dissimilarity" :
+        for i in range(1, 100):
             dissimilarity_eval(s, original_dist_matrixes, idxs, i, track)
 
-        if embedding=="resampling" :
+    if embedding=="resampling" :
+        for i in range(1, 100):
             resampling_eval(sl, original_dist_matrixes, idxs, i, track)
