@@ -31,19 +31,19 @@ def resampling_eval(s, original_dist_matrixes, idxs, exec_number, track):
 
     sampling_n = [8, 16, 32, 64, 128]
     for n in sampling_n:
+
+        resFileName = "resampling_pts_{0}__exec_num_{1}__eval_streamlines_{2}__emb_streamlines{3}__track_{4}".format(n,exec_number,
+                                                                                                                     len(idxs[0]),
+                                                                                                                     len(s),
+                                                                                                                     track)
+        if os.path.isfile(results_dir + resFileName):
+            continue
+
         start_time = time.time()
         embeddings = set_number_of_points(s, nb_points=n)
         comp_time = time.time() - start_time
 
         for (idx, original_dist) in zip(idxs, original_dist_matrixes):
-            resFileName = "resampling_pts_{0}__exec_num_{1}__eval_streamlines_{2}__emb_streamlines{3}__track_{4}".format(n,
-                                                                                                                        exec_number,
-                                                                                                                        len(idx),
-                                                                                                                        len(s),
-                                                                                                                        track)
-            if os.path.isfile(results_dir + resFileName):
-                continue
-
 
             embedded_dist = pdist((np.asarray(embeddings[idx], dtype=object).reshape(len(idx), -1)), 'euclidean')
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
@@ -83,18 +83,19 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, exec_number, track):
     num_prototypes = [2, 4, 8, 10, 12, 20, 30, 40]
 
     for n in num_prototypes:
+
+        resFileName = "num_prototypes_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
+                                                                                              len(idxs[0]),
+                                                                                              track)
+
+        if os.path.isfile(results_dir + resFileName):
+            continue
+
         start_time = time.time()
         embeddings, _ = compute_dissimilarity(s, verbose=True, k=n, distance=distance)
         comp_time = time.time() - start_time
 
         for (idx, original_dist) in zip(idxs, original_dist_matrixes):
-
-            resFileName = "num_prototypes_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
-                                                                                                  len(idx),
-                                                                                                  track)
-
-            if os.path.isfile(results_dir + resFileName):
-                continue
 
             embedded_dist = pdist(embeddings[idx], 'euclidean')
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
@@ -137,19 +138,20 @@ def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
     # sizeA = [[2, 4], [2, 2, 4, 4], [2, 2, 4, 4, 8, 8, 8, 8],
     #          [2, 2, 4, 4, 8, 8, 8, 8, 16, 16, 16, 16, 16, 16, 16, 16]]
 
-    for (n, A) in zip(k, sizeA):
+    for n in k:
+
+        resFileName = "n_reference_objects_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
+                                                                                                   len(idxs[0]),
+                                                                                                   track)
+
+        if os.path.isfile(results_dir + resFileName):
+            continue
+
         start_time = time.time()
-        embeddings, _ = lipschitz.lipschitz_embedding(s, distance, linial1994=False, k=n, sizeA=A)
+        embeddings, _ = compute_lipschitz(s, distance, linial1994=False, k=n)
         comp_time = time.time() - start_time
 
         for (idx, original_dist) in zip(idxs, original_dist_matrixes):
-
-            resFileName = "n_reference_objects_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
-                                                                                                       len(idx),
-                                                                                                       track)
-
-            if os.path.isfile(results_dir + resFileName):
-                continue
 
             embedded_dist = pdist(embeddings[idx], 'euclidean')
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
@@ -164,7 +166,7 @@ def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
                 f.write('eval_streamlines\t' + str(len(idx)) + '\n')
                 f.write('exec_time\t' + str(comp_time) + '\n')
                 f.write('n_reference_objects\t' + str(n) + '\n')
-                f.write('object_sizes\t' + ' '.join([str(x) for x in A]) + '\n')
+                #f.write('object_sizes\t' + ' '.join([str(x) for x in A]) + '\n')
 
 
 def lmds_eval(s, original_dist_matrixes, idxs, exec_number, track):
@@ -192,9 +194,9 @@ def lmds_eval(s, original_dist_matrixes, idxs, exec_number, track):
         for l in n_landmarks:
 
             resFileName = "n_landmarks__{0}__embedding_size_{1}__exec_num_{2}__n_streamlines_{3}__track_{4}".format(l,
-                                                                                                                    len(embeddings[0]),
+                                                                                                                    n,
                                                                                                                     exec_number,
-                                                                                                                    len(idx),
+                                                                                                                    len(idxs[0]),
                                                                                                                     track)
 
             if os.path.isfile(results_dir + resFileName):
@@ -243,18 +245,19 @@ def fastmap_eval(s, original_dist_matrixes, idxs, exec_number, track):
     k = [2, 4, 8, 10, 12, 20, 30, 40]
 
     for n in k:
+
+        resFileName = "embedding_size_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
+                                                                                              len(idxs[0]),
+                                                                                              track)
+
+        if os.path.isfile(results_dir + resFileName):
+            continue
+
         start_time = time.time()
         embeddings = compute_fastmap(s, distance, n)
         comp_time = time.time() - start_time
 
         for (idx, original_dist) in zip(idxs, original_dist_matrixes):
-
-            resFileName = "embedding_size_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
-                                                                                                  len(idx),
-                                                                                                  track)
-
-            if os.path.isfile(results_dir + resFileName):
-                continue
 
             embedded_dist = pdist(embeddings[idx], 'euclidean')
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
@@ -286,9 +289,11 @@ if __name__ == '__main__':
     parser.add_argument("trk_num")
     args = parser.parse_args()
 
-
     embedding = args.embedding
     track = args.trk_num
+
+    print("{0} embedding".format(embedding))
+
     filename = "data/fna-ifof/deterministic_tracking_dipy_FNAL/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
     #filename = "data/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
     sl = load(filename)
@@ -296,7 +301,7 @@ if __name__ == '__main__':
 
     #comment following lines if all data is used
 
-    # s_size = 10000
+    # s_size = 1000
     # idx = np.random.permutation(s.shape[0])[:s_size]
     # s = s[idx]
     # sl = sl[idx]
@@ -304,6 +309,7 @@ if __name__ == '__main__':
     #precompute original distance matrixes for stress evaluation
 
     stress_samples = [10000]
+    print("initial distance matrix computation on subsample of dataset")
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
 
     idxs = [np.random.choice(len(s), stress_samples)]
@@ -313,20 +319,25 @@ if __name__ == '__main__':
 
     if embedding=="lipschitz":
         for i in range(1, 100):
+            print("lipschitz iteration {0}".format(i))
             lipschitz_eval(s, original_dist_matrixes, idxs, i, track)
 
     if embedding=="lmds":
         for i in range(1, 100):
+            print("lmds iteration {0}".format(i))
             lmds_eval(s, original_dist_matrixes, idxs, i,  track)
 
     if embedding=="fastmap":
         for i in range(1, 100):
+            print("fastmap iteration {0}".format(i))
             fastmap_eval(s, original_dist_matrixes, idxs, i, track)
 
     if embedding=="dissimilarity" :
         for i in range(1, 100):
+            print("dissimilarity iteration {0}".format(i))
             dissimilarity_eval(s, original_dist_matrixes, idxs, i, track)
 
     if embedding=="resampling" :
         for i in range(1, 100):
+            print("resampling iteration {0}".format(i))
             resampling_eval(sl, original_dist_matrixes, idxs, i, track)
