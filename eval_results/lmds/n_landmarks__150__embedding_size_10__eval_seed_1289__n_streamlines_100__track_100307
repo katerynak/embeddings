@@ -1,8 +1,0 @@
-stress	1.10193521765e-09
-correlation	0.982894389675
-distortion	9.36617087399
-n_streamlines	412492
-eval_streamlines	100
-exec_time	339.775121927
-n_landmarks	150
-embedding_size	10
