@@ -1,7 +1,7 @@
 import numpy as np
 from dipy.tracking.streamline import set_number_of_points
 from scipy.spatial.distance import pdist
-from euclidean_embeddings.evaluation_metrics import stress, correlation, distortion
+from euclidean_embeddings.evaluation_metrics import stress, correlation, distortion, stress_normalized, relative_distance_error
 import os
 import time
 from argparse import ArgumentParser
@@ -29,7 +29,7 @@ def resampling_eval(s, original_dist_matrixes, idxs, exec_number, track):
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
-    sampling_n = [8, 16, 32, 64, 128]
+    sampling_n = [2, 4, 8, 10, 12, 20, 30, 40]
     for n in sampling_n:
 
         resFileName = "resampling_pts_{0}__exec_num_{1}__eval_streamlines_{2}__emb_streamlines{3}__track_{4}".format(n,exec_number,
@@ -47,13 +47,16 @@ def resampling_eval(s, original_dist_matrixes, idxs, exec_number, track):
 
             embedded_dist = pdist((np.asarray(embeddings[idx], dtype=object).reshape(len(idx), -1)), 'euclidean')
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
+            emb_stress_norm = stress_normalized(dist_embedd=embedded_dist, dist_original=original_dist)
             emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
+            emb_rel_dist = relative_distance_error(dist_embedd=embedded_dist, dist_original=original_dist)
 
             #write results to file
 
             with open(results_dir + resFileName, 'w') as f:
                 f.write('stress\t' + str(emb_stress) + '\n')
+                f.write('stress_norm\t' + str(emb_stress_norm) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
                 f.write('distortion\t' + str(emb_distortion) + '\n')
                 f.write('n_streamlines\t' + str(len(s)) + '\n')
@@ -98,13 +101,18 @@ def dissimilarity_eval(s, original_dist_matrixes, idxs, exec_number, track):
         for (idx, original_dist) in zip(idxs, original_dist_matrixes):
 
             embedded_dist = pdist(embeddings[idx], 'euclidean')
+
+            emb_stress_norm = stress_normalized(dist_embedd=embedded_dist, dist_original=original_dist)
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
             emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
+            emb_rel_dist = relative_distance_error(dist_embedd=embedded_dist, dist_original=original_dist)
 
             # write results to file
             with open(results_dir + resFileName, 'w') as f:
+                f.write('rel_dist\t' + str(emb_rel_dist) + '\n')
                 f.write('stress\t' + str(emb_stress) + '\n')
+                f.write('stress_norm\t' + str(emb_stress_norm) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
                 f.write('distortion\t' + str(emb_distortion) + '\n')
                 f.write('n_streamlines\t' + str(len(s)) + '\n')
@@ -134,10 +142,6 @@ def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
 
     k = [2, 4, 8, 10, 12, 20, 30, 40]
 
-    # k = [2, 4, 8, 16]
-    # sizeA = [[2, 4], [2, 2, 4, 4], [2, 2, 4, 4, 8, 8, 8, 8],
-    #          [2, 2, 4, 4, 8, 8, 8, 8, 16, 16, 16, 16, 16, 16, 16, 16]]
-
     for n in k:
 
         resFileName = "n_reference_objects_{0}__exec_num_{1}__n_streamlines_{2}__track_{3}".format(n, exec_number,
@@ -154,19 +158,22 @@ def lipschitz_eval(s, original_dist_matrixes, idxs, exec_number, track):
         for (idx, original_dist) in zip(idxs, original_dist_matrixes):
 
             embedded_dist = pdist(embeddings[idx], 'euclidean')
+            emb_stress_norm = stress_normalized(dist_embedd=embedded_dist, dist_original=original_dist)
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
             emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
+            emb_rel_dist = relative_distance_error(dist_embedd=embedded_dist, dist_original=original_dist)
 
             with open(results_dir + resFileName, 'w') as f:
+                f.write('rel_dist\t' + str(emb_rel_dist) + '\n')
                 f.write('stress\t' + str(emb_stress) + '\n')
+                f.write('stress_norm\t' + str(emb_stress_norm) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
                 f.write('distortion\t' + str(emb_distortion) + '\n')
                 f.write('n_streamlines\t' + str(len(s)) + '\n')
                 f.write('eval_streamlines\t' + str(len(idx)) + '\n')
                 f.write('exec_time\t' + str(comp_time) + '\n')
                 f.write('n_reference_objects\t' + str(n) + '\n')
-                #f.write('object_sizes\t' + ' '.join([str(x) for x in A]) + '\n')
 
 
 def lmds_eval(s, original_dist_matrixes, idxs, exec_number, track):
@@ -208,12 +215,16 @@ def lmds_eval(s, original_dist_matrixes, idxs, exec_number, track):
 
             for (idx, original_dist) in zip(idxs, original_dist_matrixes):
                 embedded_dist = pdist(embeddings[idx], 'euclidean')
+                emb_stress_norm = stress_normalized(dist_embedd=embedded_dist, dist_original=original_dist)
                 emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
                 emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
                 emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
+                emb_rel_dist = relative_distance_error(dist_embedd=embedded_dist, dist_original=original_dist)
 
                 with open(results_dir + resFileName, 'w') as f:
+                    f.write('rel_dist\t' + str(emb_rel_dist) + '\n')
                     f.write('stress\t' + str(emb_stress) + '\n')
+                    f.write('stress_norm\t' + str(emb_stress_norm) + '\n')
                     f.write('correlation\t' + str(emb_correlation) + '\n')
                     f.write('distortion\t' + str(emb_distortion) + '\n')
                     f.write('n_streamlines\t' + str(len(s)) + '\n')
@@ -261,11 +272,15 @@ def fastmap_eval(s, original_dist_matrixes, idxs, exec_number, track):
 
             embedded_dist = pdist(embeddings[idx], 'euclidean')
             emb_stress = stress(dist_embedd=embedded_dist, dist_original=original_dist)
+            emb_stress_norm = stress_normalized(dist_embedd=embedded_dist, dist_original=original_dist)
             emb_correlation = correlation(embedded_dist.flatten(), original_dist.flatten())
             emb_distortion = distortion(dist_embedd=embedded_dist, dist_original=original_dist)
+            emb_rel_dist = relative_distance_error(dist_embedd=embedded_dist, dist_original=original_dist)
 
             with open(results_dir + resFileName, 'w') as f:
+                f.write('rel_dist\t' + str(emb_rel_dist) + '\n')
                 f.write('stress\t' + str(emb_stress) + '\n')
+                f.write('stress_norm\t' + str(emb_stress_norm) + '\n')
                 f.write('correlation\t' + str(emb_correlation) + '\n')
                 f.write('distortion\t' + str(emb_distortion) + '\n')
                 f.write('n_streamlines\t' + str(len(s)) + '\n')
@@ -294,8 +309,8 @@ if __name__ == '__main__':
 
     print("{0} embedding".format(embedding))
 
-    filename = "data/fna-ifof/deterministic_tracking_dipy_FNAL/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
-    #filename = "data/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
+    #filename = "data/fna-ifof/deterministic_tracking_dipy_FNAL/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
+    filename = "data/sub-{0}/sub-{0}_var-FNAL_tract.trk".format(track)
     sl = load(filename)
     s = np.array(sl, dtype=np.object)
 
@@ -308,36 +323,43 @@ if __name__ == '__main__':
 
     #precompute original distance matrixes for stress evaluation
 
-    stress_samples = [10000]
+    eval_samples = [10000]
     print("initial distance matrix computation on subsample of dataset")
     distance = partial(parallel_distance_computation, distance=bundles_distances_mam)
 
-    idxs = [np.random.choice(len(s), stress_samples)]
+    idxs = [np.random.choice(len(s), eval_samples)]
 
     distances = distance(s[idxs[-1]], s[idxs[-1]])
     original_dist_matrixes = [(distances[np.triu_indices(len(distances), 1)])]
 
+    # cut-off distances bigger then the mean sample distance
+    # f = lambda x, m: x if x < m else -1
+    # vfunc = np.vectorize(f)
+    # original_dist_matrixes[0] = vfunc(original_dist_matrixes[0], original_dist_matrixes[0].mean())
+
+    iter = 100
+
     if embedding=="lipschitz":
-        for i in range(1, 100):
+        for i in range(1, iter):
             print("lipschitz iteration {0}".format(i))
             lipschitz_eval(s, original_dist_matrixes, idxs, i, track)
 
     if embedding=="lmds":
-        for i in range(1, 100):
+        for i in range(1, iter):
             print("lmds iteration {0}".format(i))
             lmds_eval(s, original_dist_matrixes, idxs, i,  track)
 
     if embedding=="fastmap":
-        for i in range(1, 100):
+        for i in range(1, iter):
             print("fastmap iteration {0}".format(i))
             fastmap_eval(s, original_dist_matrixes, idxs, i, track)
 
-    if embedding=="dissimilarity" :
-        for i in range(1, 100):
+    if embedding=="dissimilarity":
+        for i in range(1, iter):
             print("dissimilarity iteration {0}".format(i))
             dissimilarity_eval(s, original_dist_matrixes, idxs, i, track)
 
-    if embedding=="resampling" :
-        for i in range(1, 100):
+    if embedding=="resampling":
+        for i in range(1, iter):
             print("resampling iteration {0}".format(i))
             resampling_eval(sl, original_dist_matrixes, idxs, i, track)
